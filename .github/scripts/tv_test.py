@@ -535,11 +535,11 @@ def main():
                             and any(re.search(r"(?i)update|aktualisieren|installieren|install", t) for t in texte(x)), 90, takt=3)
         bild("11b-android-abfrage")
         if abfrage:
-            # Knopf „Aktualisieren“/„Update“ ansteuern (Abbrechen steht meist links)
+            # Android-TV-Abfrage: „Update“ links, „Abbrechen“ rechts mit Fokus -> nach links
             for _ in range(4):
                 if re.search(r"(?i)^(update|aktualisieren|installieren|install)$", fokus()):
                     break
-                taste("DPAD_RIGHT", pause=0.8)
+                taste("DPAD_LEFT", pause=0.8)
             log("Installationsabfrage, Fokus: " + fokus())
             taste("DPAD_CENTER", pause=10)
         nachher_inst = re.search(r"lastUpdateTime=([^\n]+)", adb("shell", "dumpsys", "package", PAKET))

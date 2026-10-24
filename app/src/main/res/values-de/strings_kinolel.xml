@@ -22,7 +22,7 @@
     <string name="kinolel_hilfe">Hilfe</string>
     <string name="kinolel_hilfe_bedienung">Bedienung: Mit dem Steuerkreuz bewegst du dich, OK wählt aus. OK lange drücken öffnet das Menü (gesehen, Favorit, zur Serie). Zurück geht eine Ebene zurück – im Film erst die Leiste schließen, dann den Film. Im Film spulst du mit links/rechts, die Vorschaubilder zeigen die Stelle. Ton und Untertitel findest du in der Leiste (OK drücken).</string>
     <string name="kinolel_hilfe_anmelden">Anmelden: links ohne Tippen – QR-Code mit dem Handy scannen (oder kinolel.de → Einstellungen → Quick Connect) und bestätigen. Rechts mit Benutzername und Passwort – mit der Bildschirmtastatur oder einer Bluetooth-/Handy-Tastatur. Ein anderes Konto wählst du über das Profilbild oben links.</string>
-    <string name="kinolel_hilfe_updates">Updates: KinoLel sucht bei jedem Start nach einer neuen Version. Einmalig muss KinoLel Apps installieren dürfen: Einstellungen → Apps → Sicherheit &amp; Einschränkungen → Unbekannte Quellen → KinoLel einschalten.</string>
+    <string name="kinolel_hilfe_updates">Updates: KinoLel sucht bei jedem Start nach einer neuen Version – „Jetzt aktualisieren“ wählen. Fragt Android „App aktualisieren?“, mit links auf „Aktualisieren“ gehen und OK drücken. Einmalig muss KinoLel Apps installieren dürfen: Einstellungen → Apps → Sicherheit &amp; Einschränkungen → Unbekannte Quellen → KinoLel einschalten.</string>
     <string name="kinolel_hilfe_qr">Hilfe auf kinolel.de</string>
     <string name="kinolel_keine_verbindung">KinoLel ist gerade nicht erreichbar. Bitte prüfe die Internetverbindung des Fernsehers – die App versucht es gleich noch einmal.</string>
     <string name="kinolel_erneut_versuchen">Erneut versuchen</string>

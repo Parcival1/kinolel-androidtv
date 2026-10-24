@@ -22,7 +22,7 @@
     <string name="kinolel_hilfe">Help</string>
     <string name="kinolel_hilfe_bedienung">Controls: Move with the D-pad, OK selects. Hold OK to open the menu (watched, favorite, go to series). Back goes one level back – while watching it first closes the bar, then the video. While watching, left/right seeks and preview images show where you are. Audio and subtitles are in the bar (press OK).</string>
     <string name="kinolel_hilfe_anmelden">Sign in: on the left without typing – scan the QR code with your phone (or open kinolel.de → Settings → Quick Connect) and confirm. On the right with username and password – with the on-screen keyboard or a Bluetooth/phone keyboard. Switch accounts with the profile picture at the top left.</string>
-    <string name="kinolel_hilfe_updates">Updates: KinoLel checks for a new version on every start. Once, KinoLel needs permission to install apps: Settings → Apps → Security &amp; restrictions → Unknown sources → turn on KinoLel.</string>
+    <string name="kinolel_hilfe_updates">Updates: KinoLel checks for a new version on every start – choose “Update now”. When Android asks “Do you want to update this app?”, move left to “Update” and press OK. Once, KinoLel needs permission to install apps: Settings → Apps → Security &amp; restrictions → Unknown sources → turn on KinoLel.</string>
     <string name="kinolel_hilfe_qr">Help on kinolel.de</string>
     <string name="kinolel_keine_verbindung">KinoLel can\'t be reached right now. Please check the TV\'s internet connection – the app will try again shortly.</string>
     <string name="kinolel_erneut_versuchen">Try again</string>
