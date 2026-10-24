@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import androidx.activity.addCallback
 import org.jellyfin.androidtv.kinolel.Aktualisierung
 import org.jellyfin.androidtv.kinolel.KinoLelMeldungenAnzeige
 import org.jellyfin.androidtv.kinolel.Neuigkeiten
@@ -61,6 +62,11 @@ class MainActivity : FragmentActivity() {
 			}.launchIn(lifecycleScope)
 
 		if (savedInstanceState == null && navigationRepository.canGoBack) navigationRepository.reset(clearHistory = true)
+
+		// KinoLel: Zurück auf der Startseite (nichts mehr zurück) -> Google-TV-Startbildschirm, KinoLel bleibt im Hintergrund
+		// und ist beim nächsten Öffnen sofort da (kein „App beenden?“, ein Druck weniger). Seiten und Player haben eigene
+		// Zurück-Behandlung und kommen vorher dran.
+		onBackPressedDispatcher.addCallback(this) { moveTaskToBack(true) }
 
 		navigationRepository.currentAction
 			.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)

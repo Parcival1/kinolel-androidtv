@@ -26,7 +26,7 @@
     <string name="kinolel_hilfe_qr">Súgó a kinolel.de oldalon</string>
     <string name="kinolel_keine_verbindung">A KinoLel most nem érhető el. Ellenőrizd a tévé internetkapcsolatát – az alkalmazás hamarosan újra próbálkozik.</string>
     <string name="kinolel_erneut_versuchen">Újrapróbálás</string>
-    <string name="kinolel_quickconnect_qr">Olvasd be a telefonoddal – a kód már ki van töltve.</string>
+    <string name="kinolel_quickconnect_qr">Olvasd be a telefonoddal</string>
     <string name="kinolel_anmelden_ohne_tippen">Gépelés nélkül (Quick Connect)</string>
     <string name="kinolel_anmelden_mit_passwort">Felhasználónévvel és jelszóval</string>
 </resources>
