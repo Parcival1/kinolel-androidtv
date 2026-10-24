@@ -389,6 +389,16 @@ def main():
         f.write(mem)
     merke("Speicher (PSS)", 0 < mb < 400, f"{mb:.0f} MB")
 
+    # 11. Zurück auf der Startseite -> Google-TV-Startbildschirm, KinoLel bleibt im Hintergrund (Prozess lebt)
+    for _ in range(3):
+        taste("BACK", pause=1.5)
+    oben = adb("shell", "dumpsys", "activity", "activities")
+    vorne = re.search(r"(?:mResumedActivity|topResumedActivity)[^\n]*", oben)
+    lebt = bool(adb("shell", "pidof", PAKET).strip())
+    bild("12-zurueck-startbildschirm")
+    merke("Zurück auf der Startseite: Google-TV-Startbildschirm, App im Hintergrund",
+          lebt and vorne is not None and PAKET not in vorne[0], (vorne[0] if vorne else "?")[:120])
+
 
 try:
     main()
