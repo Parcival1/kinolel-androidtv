@@ -9,7 +9,7 @@ KinoLel selbst (Hinweis „Update verfügbar“ → „Jetzt aktualisieren“).
 2. **App „Downloader“** (von AFTVnews) aus dem Play Store installieren: auf dem Startbildschirm suchen, „Installieren“.
 3. **Downloader erlauben, Apps zu installieren:** Einstellungen → Apps → Sicherheit und Einschränkungen →
    Unbekannte Quellen → „Downloader“ einschalten.
-4. **KinoLel laden:** Downloader öffnen, ins Adressfeld `kinolel.de/web/tv.apk` eingeben, „Los“ → „Installieren“.
+4. **KinoLel laden:** Downloader öffnen, ins Adressfeld `kinolel.de/web/tv.html` eingeben, „Los“ → „Installieren“.
    Danach bietet Downloader an, die Datei zu löschen – „Löschen“ wählen (spart Platz).
 5. **Anmelden:** KinoLel öffnen (Apps → KinoLel). Der Fernseher zeigt einen Code und einen QR-Code. Mit dem Handy den
    QR-Code scannen (oder in der KinoLel-App / auf kinolel.de: Einstellungen → Quick Connect) und bestätigen.
@@ -21,7 +21,7 @@ KinoLel selbst (Hinweis „Update verfügbar“ → „Jetzt aktualisieren“).
 2. **„Downloader” alkalmazás** (AFTVnews) telepítése a Play Áruházból.
 3. **Engedélyezd a Downloadernek az alkalmazástelepítést:** Beállítások → Alkalmazások → Biztonság és korlátozások →
    Ismeretlen források → „Downloader” bekapcsolása.
-4. **KinoLel letöltése:** nyisd meg a Downloadert, írd be a címet: `kinolel.de/web/tv.apk`, „Go” → „Telepítés”.
+4. **KinoLel letöltése:** nyisd meg a Downloadert, írd be a címet: `kinolel.de/web/tv.html`, „Go” → „Telepítés”.
    Utána a Downloader felajánlja a fájl törlését – válaszd a „Törlés” lehetőséget.
 5. **Bejelentkezés:** nyisd meg a KinoLelt. A tévé egy kódot és egy QR-kódot mutat. Olvasd be a telefonoddal (vagy a
    KinoLel alkalmazásban / a kinolel.de oldalon: Beállítások → Quick Connect), és hagyd jóvá.
