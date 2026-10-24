@@ -294,10 +294,15 @@ def main():
     if not film:
         merke("Testfilm gefunden", False, TESTFILM)
         return
+    time.sleep(5)  # Startseite nach der Rückkehr fertig laden lassen
     app_start(("--es", "ItemId", film["Id"]))
-    vorne = re.search(r"topResumedActivity[^\n]*", adb("shell", "dumpsys", "activity", "activities"))
-    log("Nach Aufruf der Detailseite vorne: " + (vorne[0][:140] if vorne else "?"))
-    xml = warte_auf(enthaelt(TESTFILM), 60)
+    xml = warte_auf(enthaelt(TESTFILM), 30)
+    if xml is None:
+        # beobachtet (1 von 5 Läufen): Detailseite bleibt leer, wenn der Aufruf ins Nachladen der Startseite fällt
+        log("Detailseite blieb leer – zweiter Aufruf")
+        bild("05a-details-leer")
+        app_start(("--es", "ItemId", film["Id"]))
+        xml = warte_auf(enthaelt(TESTFILM), 40)
     time.sleep(3)
     bild("05-details")
     merke("Detailseite Testfilm", xml is not None, "Fokus: " + fokus())
