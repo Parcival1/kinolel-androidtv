@@ -17,10 +17,14 @@
     <!-- Search permissions (voice to text) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- KinoLel: Updates selbst installieren (APK aus apps.json; Freigabe „Unbekannte Apps installieren“ nötig) -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
     <!-- Device feature requirements -->
+    <!-- KinoLel TV: nur für Fernseher (Android TV / Google TV) -->
     <uses-feature
         android:name="android.software.leanback"
-        android:required="false" />
+        android:required="true" />
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
@@ -56,6 +60,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Jellyfin"
         android:usesCleartextTraffic="true">
+
+        <!-- KinoLel: Antwort von Android auf die Update-Installation -->
+        <receiver
+            android:name=".kinolel.InstallationsAntwort"
+            android:exported="false" />
 
         <!-- Screensaver -->
         <service

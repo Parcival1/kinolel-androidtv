@@ -1,6 +1,7 @@
 package org.jellyfin.androidtv.ui.navigation
 
 import kotlinx.serialization.json.Json
+import org.jellyfin.androidtv.kinolel.KinoLelSeiteFragment
 import org.jellyfin.androidtv.constant.Extras
 import org.jellyfin.androidtv.ui.browsing.BrowseGridFragment
 import org.jellyfin.androidtv.ui.browsing.BrowseRecordingsFragment
@@ -33,6 +34,11 @@ import java.util.UUID
 object Destinations {
 	// General
 	val home = fragmentDestination<HomeFragment>()
+
+	// KinoLel: Wünsche / Hilfe (QR-Codes)
+	fun kinolelSeite(seite: String) = fragmentDestination<KinoLelSeiteFragment> {
+		putString(KinoLelSeiteFragment.ARG_SEITE, seite)
+	}
 	fun search(query: String? = null) = fragmentDestination<SearchFragment> {
 		putString(SearchFragment.EXTRA_QUERY, query)
 	}

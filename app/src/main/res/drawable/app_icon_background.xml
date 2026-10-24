@@ -1,9 +1,10 @@
+<!-- KinoLel: dunkler Hintergrund des Programmsymbols (#0B0F18 wie kinolel.de) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="#000B25"
+        android:fillColor="#0B0F18"
         android:pathData="M0,0h108v108h-108z" />
 </vector>

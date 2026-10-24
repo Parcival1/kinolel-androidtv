@@ -2,6 +2,9 @@
 <resources>
 
     <style name="Theme.Jellyfin" parent="@style/Theme.AppCompat.Leanback">
+        <!-- KinoLel: Schrift Inter -->
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="fontFamily">@font/inter</item>
         <!-- Colors -->
         <item name="android:colorPrimary">@color/grey</item>
         <item name="android:colorPrimaryDark">@color/grey</item>

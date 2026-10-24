@@ -1,13 +1,13 @@
 <resources>
     <!-- Base Colors -->
-    <color name="jellyfin_blue">#00a4dc</color>
-    <color name="jellyfin_purple">#aa5cc3</color>
+    <color name="jellyfin_blue">#9AA4FF</color> <!-- KinoLel: Lavendel statt Jellyfin-Blau -->
+    <color name="jellyfin_purple">#6C72EE</color> <!-- KinoLel: Indigo -->
     <color name="midnight_blue">#031A6B</color>
     <color name="indigo_dye">#033860</color>
     <color name="spanish_blue">#1E76BA</color>
-    <color name="grey">#303030</color>
+    <color name="grey">#1E2438</color> <!-- KinoLel -->
     <color name="grey_light">#4b4b4b</color>
-    <color name="not_quite_black">#101010</color>
+    <color name="not_quite_black">#0B0F18</color> <!-- KinoLel: Hintergrund wie kinolel.de -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="red">#CC3333</color>
@@ -41,25 +41,25 @@
     <color name="guide_kids_bg">#32039BE5</color>
 
     <!-- button_default -->
-    <color name="button_default_normal_background">#B3747474</color>
+    <color name="button_default_normal_background">#CC1E2438</color>
     <color name="button_default_disabled_background">#33747474</color>
-    <color name="button_default_highlight_background">#E6CCCCCC</color>
+    <color name="button_default_highlight_background">#FF9AA4FF</color> <!-- KinoLel: Fokus Lavendel -->
     <color name="button_default_normal_text">#DDDDDD</color>
     <color name="button_default_disabled_text">#686868</color>
-    <color name="button_default_highlight_text">#444444</color>
+    <color name="button_default_highlight_text">#0B0F18</color>
     <color name="button_default_activated_text">#CC3333</color>
     <color name="button_default_progress_background">#33000000</color>
 
     <!-- input_default -->
     <color name="input_default_stroke">#B3747474</color>
     <color name="input_default_disabled_background">#33747474</color>
-    <color name="input_default_highlight_background">#DDDDDD</color>
+    <color name="input_default_highlight_background">#9AA4FF</color>
     <color name="input_default_normal_text">#DDDDDD</color>
     <color name="input_default_disabled_text">#686868</color>
-    <color name="input_default_highlight_text">#444444</color>
+    <color name="input_default_highlight_text">#0B0F18</color>
 
     <!-- popup_menu -->
-    <color name="popup_menu_background">#202124</color>
+    <color name="popup_menu_background">#1B1D2A</color> <!-- KinoLel: Dialogfläche -->
 
     <!-- Card Background Color -->
     <color name="lb_basic_card_info_bg_color">@color/grey</color>

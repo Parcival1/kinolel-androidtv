@@ -1,4 +1,6 @@
 [versions]
+# KinoLel: QR-Codes
+zxing = "3.5.3"
 aboutlibraries = "15.3.0"
 accompanist = "0.37.3"
 acra = "5.14.2"
@@ -51,6 +53,8 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 [libraries]
+# KinoLel: QR-Codes
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 # Jellyfin
 jellyfin-sdk = { module = "org.jellyfin.sdk:jellyfin-core", version.ref = "jellyfin-sdk" }
 

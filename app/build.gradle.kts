@@ -1,3 +1,9 @@
+import java.util.Properties
+
+// KinoLel: Name, Server, Kennung und Version stehen nur in marke.properties
+val marke = Properties().apply { rootProject.file("marke.properties").reader(Charsets.UTF_8).use { load(it) } }
+fun marke(name: String): String = marke.getProperty(name) ?: error("marke.properties: $name fehlt")
+
 plugins {
 	alias(libs.plugins.aboutlibraries)
 	alias(libs.plugins.android.application)
@@ -13,10 +19,23 @@ android {
 		minSdk = libs.versions.android.minSdk.get().toInt()
 		targetSdk = libs.versions.android.targetSdk.get().toInt()
 
-		// Release version
-		applicationId = namespace
-		versionName = project.getVersionName()
+		// KinoLel: eigene Kennung, damit die App neben der KinoLel-Handy-App und der offiziellen Jellyfin-App installierbar ist
+		applicationId = marke("APPLICATION_ID")
+		versionName = project.getVersionName(fallback = marke("VERSION"))
 		versionCode = getVersionCode(versionName!!)
+
+		buildConfigField("String", "KINOLEL_SERVER", "\"${marke("SERVER_URL")}\"")
+		buildConfigField("String", "KINOLEL_APPS_LISTE", "\"${marke("APPS_LISTE")}\"")
+		buildConfigField("String", "KINOLEL_APPS_SCHLUESSEL", "\"${marke("APPS_SCHLUESSEL")}\"")
+		buildConfigField("String", "KINOLEL_UPDATE_REPO", "\"${marke("UPDATE_REPO")}\"")
+		buildConfigField("String", "KINOLEL_WUENSCHE", "\"${marke("WUENSCHE_URL")}\"")
+		buildConfigField("String", "KINOLEL_WUENSCHE_HU", "\"${marke("WUENSCHE_URL_HU")}\"")
+		buildConfigField("String", "KINOLEL_HILFE", "\"${marke("HILFE_URL")}\"")
+	}
+
+	// KinoLel: Oberfläche nur Deutsch, Ungarisch und Englisch (Rückfall)
+	androidResources {
+		localeFilters += listOf("en", "de", "hu")
 	}
 
 	buildFeatures {
@@ -57,13 +76,14 @@ android {
 			isShrinkResources = true
 			proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 
-			// Set package names used in various XML files
-			resValue("string", "app_id", namespace!!)
-			resValue("string", "app_search_suggest_authority", "${namespace}.content")
-			resValue("string", "app_search_suggest_intent_data", "content://${namespace}.content/intent")
+			// Set package names used in various XML files (KinoLel: eigene Kennung statt namespace)
+			val id = defaultConfig.applicationId!!
+			resValue("string", "app_id", id)
+			resValue("string", "app_search_suggest_authority", "${id}.content")
+			resValue("string", "app_search_suggest_intent_data", "content://${id}.content/intent")
 
 			// Set flavored application name
-			resValue("string", "app_name", "@string/app_name_release")
+			resValue("string", "app_name", marke("APP_NAME"))
 
 			buildConfigField("boolean", "DEVELOPMENT", "false")
 
@@ -74,13 +94,14 @@ android {
 			// Use different application id to run release and debug at the same time
 			applicationIdSuffix = ".debug"
 
-			// Set package names used in various XML files
-			resValue("string", "app_id", namespace + applicationIdSuffix)
-			resValue("string", "app_search_suggest_authority", "${namespace + applicationIdSuffix}.content")
-			resValue("string", "app_search_suggest_intent_data", "content://${namespace + applicationIdSuffix}.content/intent")
+			// Set package names used in various XML files (KinoLel: eigene Kennung statt namespace)
+			val id = defaultConfig.applicationId + applicationIdSuffix
+			resValue("string", "app_id", id)
+			resValue("string", "app_search_suggest_authority", "${id}.content")
+			resValue("string", "app_search_suggest_intent_data", "content://${id}.content/intent")
 
 			// Set flavored application name
-			resValue("string", "app_name", "@string/app_name_debug")
+			resValue("string", "app_name", marke("APP_NAME") + " Test")
 
 			buildConfigField("boolean", "DEVELOPMENT", (defaultConfig.versionCode!! < 100).toString())
 		}
@@ -97,7 +118,7 @@ android {
 	}
 }
 
-base.archivesName.set("jellyfin-androidtv-v${project.getVersionName()}")
+base.archivesName.set("kinolel-tv-v${project.getVersionName(fallback = marke("VERSION"))}")
 
 tasks.register("versionTxt") {
 	val path = layout.buildDirectory.asFile.get().resolve("version.txt")
@@ -126,6 +147,9 @@ dependencies {
 			"unstable-snapshot" -> version { strictly("openapi-unstable-SNAPSHOT") }
 		}
 	}
+
+	// KinoLel: QR-Codes (Quick Connect, Wünsche, Hilfe)
+	implementation(libs.zxing.core)
 
 	// Kotlin
 	implementation(libs.kotlinx.coroutines)

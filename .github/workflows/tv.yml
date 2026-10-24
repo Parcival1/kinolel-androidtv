@@ -1,0 +1,152 @@
+# KinoLel TV (Android TV / Google TV): Build, Unit-Tests, Test im Android-TV-Emulator (nur Fernbedienung)
+#
+# Bei jedem Push auf main: Debug-APK (für den Test) und – mit Signierschlüssel – signierte Release-APK als Artefakt.
+# Tag "v*" (z. B. v0.1.0): zusätzlich Release unter "Releases" (APK-Link landet über apps.json in der Update-Prüfung).
+# Secrets (setzt nur Lel): KEYSTORE_BASE64, KEYSTORE_PASSWORD, SIGNING_KEY_PASSWORD (gleicher Schlüssel wie KinoLel-Android),
+# KINOLEL_TEST_PW (Passwort des Hilfskontos kinolel-hilfe; ohne läuft der Emulatortest nur bis zum Anmeldebildschirm).
+name: tv
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Java
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version-file: .tools-versions
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+
+      - name: Version
+        run: |
+          VERSION=$(grep '^VERSION=' marke.properties | cut -d= -f2)
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then VERSION=${GITHUB_REF#refs/tags/v}; fi
+          echo "JELLYFIN_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Version: $VERSION"
+
+      - name: Signierschlüssel
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::Secret KEYSTORE_BASE64 fehlt – nur Debug-APK (Lel setzt die Secrets)"
+            echo "SIGNIERT=0" >> $GITHUB_ENV
+          else
+            echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/kinolel-release.p12"
+            echo "SIGNIERT=1" >> $GITHUB_ENV
+          fi
+
+      - name: Debug-APK (für den Emulatortest)
+        run: ./gradlew assembleDebug
+
+      - name: Release-APK (signiert)
+        if: env.SIGNIERT == '1'
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/kinolel-release.p12
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: kinolel # nicht geheim (als Secret würde GitHub das Wort in allen Logs schwärzen)
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease
+
+      - name: Unit-Tests
+        run: ./gradlew testDebugUnitTest
+
+      - name: APKs umbenennen + Signatur prüfen
+        run: |
+          mkdir -p build/kinolel
+          cp "$(find app/build/outputs/apk/debug -name '*.apk' | head -1)" "build/kinolel/KinoLel-TV-$JELLYFIN_VERSION-test.apk"
+          if [ "$SIGNIERT" = "1" ]; then
+            cp "$(find app/build/outputs/apk/release -name '*.apk' | head -1)" "build/kinolel/KinoLel-TV-$JELLYFIN_VERSION.apk"
+            BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+            # Exit-Code 0 = Signatur gültig; Zertifikat anzeigen (SHA-256 muss zum Schlüssel auf CT 104 passen)
+            "$BT/apksigner" verify --print-certs "build/kinolel/KinoLel-TV-$JELLYFIN_VERSION.apk" > "$RUNNER_TEMP/signatur.txt"
+            grep -i -E "certificate (DN|SHA-256)" "$RUNNER_TEMP/signatur.txt" || cat "$RUNNER_TEMP/signatur.txt"
+          fi
+          rm -f "$RUNNER_TEMP/kinolel-release.p12"
+          ls -la build/kinolel
+
+      - name: APKs hochladen
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: kinolel-tv-apk
+          path: build/kinolel/*.apk
+          if-no-files-found: error
+
+      - name: Release veröffentlichen (nur bei Tag v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$SIGNIERT" != "1" ]; then echo "::error::Ohne Signierschlüssel kein Release"; exit 1; fi
+          gh release create "$GITHUB_REF_NAME" "build/kinolel/KinoLel-TV-$JELLYFIN_VERSION.apk" \
+            --title "KinoLel TV $GITHUB_REF_NAME" --notes-file TESTANLEITUNG.md
+
+  tvtest:
+    name: Test im Android-TV-Emulator (nur Fernbedienung)
+    needs: build
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: APK holen
+        uses: actions/download-artifact@v8
+        with:
+          name: kinolel-tv-apk
+          path: apk
+
+      - name: KVM freischalten
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Android-TV-Emulator (API 34, 1080p) – Test nur mit Tastendrücken
+        env:
+          KINOLEL_TEST_PW: ${{ secrets.KINOLEL_TEST_PW }}
+          PAKET: de.kinolel.tv.debug
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: android-tv
+          arch: x86
+          profile: tv_1080p
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: APK=$(ls apk/*-test.apk | head -1) python3 .github/scripts/tv_test.py
+
+      - name: Ergebnis
+        if: always()
+        run: |
+          cat tvtest/ablauf.txt || true
+          if [ -f tvtest/ergebnis.json ]; then
+            python3 -c "import json,sys; e=json.load(open('tvtest/ergebnis.json')); f=[k for k,v in e.items() if not v['ok']]; print('Fehler:', f) if f else print('alles OK'); sys.exit(1 if f else 0)"
+          else
+            exit 1
+          fi
+
+      - name: Bildschirmfotos hochladen
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tvtest
+          path: tvtest/
+          retention-days: 7

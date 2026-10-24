@@ -16,7 +16,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.jellyfin.androidtv.R
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import org.jellyfin.androidtv.auth.model.PendingQuickConnectState
 import org.jellyfin.androidtv.auth.model.UnavailableQuickConnectState
+import org.jellyfin.androidtv.kinolel.KinoLelQuickConnectQr
 import org.jellyfin.androidtv.data.service.BackgroundService
 import org.jellyfin.androidtv.databinding.FragmentUserLoginBinding
 import org.jellyfin.androidtv.ui.startup.UserLoginViewModel
@@ -56,6 +59,9 @@ class UserLoginFragment : Fragment() {
 		_binding = FragmentUserLoginBinding.inflate(inflater, container, false)
 
 		binding.cancel.setOnClickListener { parentFragmentManager.popBackStack() }
+		// KinoLel: erste Anmeldung auf dem Fernseher -> nichts, wohin „Abbrechen“ zurückführen könnte
+		binding.cancel.isVisible = parentFragmentManager.backStackEntryCount > 0
+		binding.kinolelQr.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 		binding.useCredentials.setOnClickListener { setLoginMethod<UserLoginCredentialsFragment>() }
 		binding.useQuickconnect.setOnClickListener { setLoginMethod<UserLoginQuickConnectFragment>() }
 
@@ -75,7 +81,7 @@ class UserLoginFragment : Fragment() {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 				// Update "connecting to ..." text and background
 				userLoginViewModel.server.onEach { server ->
-					val name = server?.name ?: "Jellyfin"
+					val name = server?.name ?: getString(R.string.app_name)
 					binding.subtitle.text = getString(R.string.login_connect_to, name)
 
 					if (server != null) backgroundService.setBackground(server)
@@ -86,6 +92,10 @@ class UserLoginFragment : Fragment() {
 				userLoginViewModel.quickConnectState.onEach { state ->
 					binding.useQuickconnect.isEnabled = state != UnavailableQuickConnectState
 					if (state == UnavailableQuickConnectState) setLoginMethod<UserLoginCredentialsFragment>()
+
+					// KinoLel: QR-Code zum Code
+					quickConnectCode = (state as? PendingQuickConnectState)?.code
+					qrAktualisieren()
 				}.launchIn(this)
 			}
 		}
@@ -95,6 +105,17 @@ class UserLoginFragment : Fragment() {
 		super.onDestroyView()
 
 		_binding = null
+	}
+
+	private var quickConnectCode: String? = null
+	private var quickConnectAktiv = false
+
+	/** KinoLel: QR-Code rechts nur bei Quick Connect und wenn ein Code da ist. */
+	private fun qrAktualisieren() {
+		val code = quickConnectCode
+		val sichtbar = quickConnectAktiv && code != null
+		binding.kinolelQr.isVisible = sichtbar
+		if (sichtbar) binding.kinolelQr.setContent { KinoLelQuickConnectQr(code!!) }
 	}
 
 	private inline fun <reified T : Fragment> setLoginMethod() {
@@ -109,5 +130,8 @@ class UserLoginFragment : Fragment() {
 		// Hide button for active fragment
 		binding.useCredentials.isVisible = T::class != UserLoginCredentialsFragment::class
 		binding.useQuickconnect.isVisible = T::class != UserLoginQuickConnectFragment::class
+
+		quickConnectAktiv = T::class == UserLoginQuickConnectFragment::class
+		qrAktualisieren()
 	}
 }

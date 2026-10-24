@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KinoLel TV: eigene Texte (Deutsch). Wortlaut wie in der KinoLel-Handy-App. -->
+<resources>
+    <string name="kinolel_update_titel">Update verfügbar</string>
+    <string name="kinolel_update_text">KinoLel %1$s ist verfügbar (installiert: %2$s). Jetzt aktualisieren?</string>
+    <string name="kinolel_update_jetzt">Jetzt aktualisieren</string>
+    <string name="kinolel_spaeter">Später</string>
+    <string name="kinolel_update_laedt">KinoLel %1$s wird geladen …</string>
+    <string name="kinolel_update_fehler">Update konnte nicht geladen werden.</string>
+    <string name="kinolel_update_aktuell">KinoLel ist auf dem neuesten Stand.</string>
+    <string name="kinolel_update_keine_verbindung">Update-Suche gerade nicht möglich – keine Verbindung.</string>
+    <string name="kinolel_update_suchen">Nach Updates suchen</string>
+    <string name="kinolel_update_freigabe_titel">Erlaubnis für Updates</string>
+    <string name="kinolel_update_freigabe_text">Damit sich KinoLel selbst aktualisieren kann, braucht es einmalig die Erlaubnis „Unbekannte Apps installieren“. Auf der nächsten Seite KinoLel einschalten, mit Zurück hierher kommen und noch einmal „Jetzt aktualisieren“ wählen.</string>
+    <string name="kinolel_einstellungen_oeffnen">Einstellungen öffnen</string>
+    <string name="kinolel_abbrechen">Abbrechen</string>
+    <string name="kinolel_neu_titel">Neu in KinoLel %1$s</string>
+    <string name="kinolel_neu_version">Version %1$s</string>
+    <string name="kinolel_neu_ok">Alles klar</string>
+    <string name="kinolel_wuensche">Wünsche</string>
+    <string name="kinolel_wuensche_text">Fehlt ein Film oder eine Serie? Scanne den Code mit dem Handy und wünsch es dir im KinoLel-Wunschportal. Du meldest dich dort mit deinem KinoLel-Konto an – sobald es da ist, bekommst du Bescheid.</string>
+    <string name="kinolel_hilfe">Hilfe</string>
+    <string name="kinolel_hilfe_bedienung">Bedienung: Mit dem Steuerkreuz bewegst du dich, OK wählt aus. OK lange drücken öffnet das Menü (gesehen, Favorit, zur Serie). Zurück geht eine Ebene zurück – im Film erst die Leiste schließen, dann den Film. Im Film spulst du mit links/rechts, die Vorschaubilder zeigen die Stelle. Ton und Untertitel findest du in der Leiste (OK drücken).</string>
+    <string name="kinolel_hilfe_anmelden">Anmelden ohne Tippen: Der Fernseher zeigt einen Code und einen QR-Code. Scanne ihn mit dem Handy (oder öffne kinolel.de → Einstellungen → Quick Connect) und bestätige. Ein anderes Konto wählst du über das Profilbild oben links.</string>
+    <string name="kinolel_hilfe_updates">Updates: KinoLel sucht bei jedem Start nach einer neuen Version. Einmalig muss KinoLel Apps installieren dürfen: Einstellungen → Apps → Sicherheit &amp; Einschränkungen → Unbekannte Quellen → KinoLel einschalten.</string>
+    <string name="kinolel_hilfe_qr">Hilfe auf kinolel.de</string>
+    <string name="kinolel_keine_verbindung">KinoLel ist gerade nicht erreichbar. Bitte prüfe die Internetverbindung des Fernsehers – die App versucht es gleich noch einmal.</string>
+    <string name="kinolel_erneut_versuchen">Erneut versuchen</string>
+    <string name="kinolel_quickconnect_qr">Mit dem Handy scannen – der Code ist schon eingetragen, du musst nur noch bestätigen.</string>
+</resources>

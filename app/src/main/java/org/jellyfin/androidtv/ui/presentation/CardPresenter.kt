@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +35,7 @@ import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.jellyfin.androidtv.R
+import org.jellyfin.androidtv.kinolel.KinoLelFarben
 import org.jellyfin.androidtv.constant.ImageType
 import org.jellyfin.androidtv.ui.base.JellyfinTheme
 import org.jellyfin.androidtv.ui.base.Text
@@ -375,6 +377,8 @@ private fun CardViewHolderContent(
 			},
 			modifier = Modifier
 				.size(size)
+				// KinoLel: Fokus deutlich sichtbar – Lavendel-Rahmen zusätzlich zur Vergrößerung
+				.then(if (focused) Modifier.border(3.dp, KinoLelFarben.Lavendel, JellyfinTheme.shapes.medium) else Modifier)
 		)
 	}
 

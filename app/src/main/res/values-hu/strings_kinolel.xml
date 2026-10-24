@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KinoLel TV: saját szövegek (magyar). Ugyanúgy, mint a KinoLel telefonos alkalmazásban. -->
+<resources>
+    <string name="kinolel_update_titel">Frissítés elérhető</string>
+    <string name="kinolel_update_text">Elérhető a KinoLel %1$s (telepítve: %2$s). Frissítsünk most?</string>
+    <string name="kinolel_update_jetzt">Frissítés most</string>
+    <string name="kinolel_spaeter">Később</string>
+    <string name="kinolel_update_laedt">A KinoLel %1$s letöltése folyamatban …</string>
+    <string name="kinolel_update_fehler">A frissítést nem sikerült letölteni.</string>
+    <string name="kinolel_update_aktuell">A KinoLel naprakész.</string>
+    <string name="kinolel_update_keine_verbindung">A frissítések keresése most nem lehetséges – nincs kapcsolat.</string>
+    <string name="kinolel_update_suchen">Frissítések keresése</string>
+    <string name="kinolel_update_freigabe_titel">Engedély a frissítésekhez</string>
+    <string name="kinolel_update_freigabe_text">Ahhoz, hogy a KinoLel frissíteni tudja magát, egyszer engedélyezni kell az „Ismeretlen alkalmazások telepítése” beállítást. A következő oldalon kapcsold be a KinoLelt, a Vissza gombbal térj ide vissza, és válaszd újra a „Frissítés most” lehetőséget.</string>
+    <string name="kinolel_einstellungen_oeffnen">Beállítások megnyitása</string>
+    <string name="kinolel_abbrechen">Mégse</string>
+    <string name="kinolel_neu_titel">Újdonságok – KinoLel %1$s</string>
+    <string name="kinolel_neu_version">%1$s. verzió</string>
+    <string name="kinolel_neu_ok">Rendben</string>
+    <string name="kinolel_wuensche">Kívánságok</string>
+    <string name="kinolel_wuensche_text">Hiányzik egy film vagy sorozat? Olvasd be a kódot a telefonoddal, és kérd a KinoLel kívánságportálján. A KinoLel-fiókoddal jelentkezel be – amint elérhető, szólunk.</string>
+    <string name="kinolel_hilfe">Súgó</string>
+    <string name="kinolel_hilfe_bedienung">Kezelés: A nyílgombokkal mozogsz, az OK gombbal választasz. Az OK hosszú lenyomása megnyitja a menüt (megnézve, kedvenc, ugrás a sorozathoz). A Vissza gomb egy szinttel visszalép – film közben előbb a sávot zárja be, aztán a filmet. Film közben balra/jobbra tekersz, az előnézeti képek mutatják, hol vagy. A hangsávot és a feliratot a sávban találod (OK gomb).</string>
+    <string name="kinolel_hilfe_anmelden">Bejelentkezés gépelés nélkül: A tévé egy kódot és egy QR-kódot mutat. Olvasd be a telefonoddal (vagy nyisd meg: kinolel.de → Beállítások → Quick Connect), és hagyd jóvá. Másik fiókot a bal felső profilképnél választhatsz.</string>
+    <string name="kinolel_hilfe_updates">Frissítések: A KinoLel minden indításkor keres új verziót. Egyszer engedélyezni kell, hogy a KinoLel alkalmazásokat telepíthessen: Beállítások → Alkalmazások → Biztonság és korlátozások → Ismeretlen források → KinoLel bekapcsolása.</string>
+    <string name="kinolel_hilfe_qr">Súgó a kinolel.de oldalon</string>
+    <string name="kinolel_keine_verbindung">A KinoLel most nem érhető el. Ellenőrizd a tévé internetkapcsolatát – az alkalmazás hamarosan újra próbálkozik.</string>
+    <string name="kinolel_erneut_versuchen">Újrapróbálás</string>
+    <string name="kinolel_quickconnect_qr">Olvasd be a telefonoddal – a kód már ki van töltve, csak jóvá kell hagynod.</string>
+</resources>

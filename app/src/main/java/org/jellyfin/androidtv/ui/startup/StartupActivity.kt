@@ -39,7 +39,12 @@ import org.jellyfin.androidtv.ui.itemhandling.ItemLauncher
 import org.jellyfin.androidtv.ui.navigation.Destinations
 import org.jellyfin.androidtv.ui.navigation.NavigationRepository
 import org.jellyfin.androidtv.ui.playback.MediaManager
-import org.jellyfin.androidtv.ui.startup.fragment.SelectServerFragment
+import org.jellyfin.androidtv.auth.model.ConnectedState
+import org.jellyfin.androidtv.auth.model.UnableToConnectState
+import org.jellyfin.androidtv.auth.repository.ServerUserRepository
+import org.jellyfin.androidtv.kinolel.KinoLelKeineVerbindungFragment
+import org.jellyfin.androidtv.kinolel.Marke
+import org.jellyfin.androidtv.ui.startup.fragment.UserLoginFragment
 import org.jellyfin.androidtv.ui.startup.fragment.ServerFragment
 import org.jellyfin.androidtv.ui.startup.fragment.SplashFragment
 import org.jellyfin.androidtv.ui.startup.fragment.StartupToolbarFragment
@@ -65,6 +70,7 @@ class StartupActivity : FragmentActivity() {
 	private val mediaManager: MediaManager by inject()
 	private val sessionRepository: SessionRepository by inject()
 	private val userRepository: UserRepository by inject()
+	private val serverUserRepository: ServerUserRepository by inject()
 	private val navigationRepository: NavigationRepository by inject()
 	private val itemLauncher: ItemLauncher by inject()
 	private val workManager: WorkManager by inject()
@@ -129,9 +135,10 @@ class StartupActivity : FragmentActivity() {
 				// Clear audio queue in case left over from last run
 				mediaManager.clearAudioQueue()
 
+				// KinoLel: fester Server kinolel.de, keine Serverauswahl
 				val server = startupViewModel.getLastServer()
-				if (server != null) showServer(server.id)
-				else showServerSelection()
+				if (server != null) kinolelAnmeldung(server.id)
+				else kinolelServerAnlegen()
 			}
 		}.launchIn(lifecycleScope)
 
@@ -208,9 +215,39 @@ class StartupActivity : FragmentActivity() {
 		)
 	}
 
-	private fun showServerSelection() = supportFragmentManager.commit {
-		replace<StartupToolbarFragment>(R.id.content_view)
-		add<SelectServerFragment>(R.id.content_view)
+	/** KinoLel: kinolel.de beim ersten Start selbst anlegen – ohne Serverauswahl. */
+	fun kinolelServerAnlegen() {
+		showSplash()
+		startupViewModel.addServer(Marke.SERVER).onEach { state ->
+			when (state) {
+				is ConnectedState -> kinolelAnmeldung(state.id)
+				is UnableToConnectState -> supportFragmentManager.commit {
+					replace<KinoLelKeineVerbindungFragment>(R.id.content_view)
+				}
+
+				else -> Unit
+			}
+		}.launchIn(lifecycleScope)
+	}
+
+	/**
+	 * KinoLel: Noch kein Konto auf diesem Fernseher -> gleich Quick Connect (Code + QR-Code).
+	 * Sonst die Kontoauswahl (Familienfernseher: „Wer schaut?“, dort auch „Konto hinzufügen“).
+	 */
+	private fun kinolelAnmeldung(serverId: UUID) {
+		val server = startupViewModel.getServer(serverId)
+		if (server != null && serverUserRepository.getStoredServerUsers(server).isEmpty()) {
+			supportFragmentManager.commit {
+				replace<StartupToolbarFragment>(R.id.content_view)
+				add<UserLoginFragment>(
+					R.id.content_view, null, createBundle {
+						putString(UserLoginFragment.ARG_SERVER_ID, serverId.toString())
+					}
+				)
+			}
+		} else {
+			showServer(serverId)
+		}
 	}
 
 	override fun onNewIntent(intent: Intent) {

@@ -40,6 +40,11 @@ import org.jellyfin.sdk.model.extensions.get
 import org.jellyfin.sdk.model.extensions.getValue
 import org.jellyfin.sdk.model.extensions.ticks
 import org.jellyfin.sdk.model.serializer.toUUIDOrNull
+import org.jellyfin.androidtv.R
+import org.jellyfin.androidtv.kinolel.KinoLelKnopf
+import org.jellyfin.androidtv.kinolel.KinoLelMeldung
+import org.jellyfin.androidtv.kinolel.KinoLelMeldungen
+import org.jellyfin.androidtv.kinolel.Marke
 import timber.log.Timber
 import java.time.Instant
 import java.util.UUID
@@ -154,7 +159,7 @@ class SocketHandler(
 				val text by message
 				val string by message
 
-				onDisplayMessage(header, text ?: string)
+				onDisplayMessage(header, text ?: string, message.entries.firstOrNull { it.key.equals("TimeoutMs", true) }?.value?.toLongOrNull())
 			}
 			.launchIn(coroutineScope)
 	}
@@ -238,14 +243,28 @@ class SocketHandler(
 		}
 	}
 
-	private fun onDisplayMessage(header: String?, text: String?) {
-		val toastMessage = buildString {
-			if (!header.isNullOrBlank()) append(header, ": ")
-			append(text)
-		}
+	/**
+	 * KinoLel: Nachrichten vom Server (z. B. „Pro Person ist nur eine Wiedergabe gleichzeitig möglich …“) als KinoLel-Dialog,
+	 * nur der Teil in der Sprache der Oberfläche. Ohne sichtbare App (oder im Player) als Toast.
+	 */
+	private fun onDisplayMessage(header: String?, text: String?, timeoutMs: Long?) {
+		val inhalt = Marke.passenderTeil(context, text.orEmpty())
+		val titel = header?.takeIf { it.isNotBlank() } ?: context.getString(R.string.app_name)
 
 		runBlocking(Dispatchers.Main) {
-			Toast.makeText(context, toastMessage, Toast.LENGTH_LONG).show()
+			if (KinoLelMeldungen.anzeigen > 0) {
+				KinoLelMeldungen.zeigen(
+					KinoLelMeldung(
+						titel = titel,
+						text = inhalt,
+						kennung = "kinolel.nachricht",
+						zeitMs = (timeoutMs ?: 0L).coerceIn(8_000L, 30_000L),
+						knoepfe = listOf(KinoLelKnopf(context.getString(R.string.kinolel_neu_ok), haupt = true, kennung = "kinolel.nachricht.ok")),
+					)
+				)
+			} else {
+				Toast.makeText(context, "$titel: $inhalt", Toast.LENGTH_LONG).show()
+			}
 		}
 	}
 }

@@ -1,0 +1,16 @@
+{
+  "versionen": [
+    {
+      "version": "0.1.0",
+      "de": [
+        "Erste Version von KinoLel für den Fernseher (Android TV / Google TV): alles mit der Fernbedienung, Anmeldung per Quick Connect und QR-Code, Wünsche und Hilfe als QR-Code."
+      ],
+      "hu": [
+        "A KinoLel első tévés változata (Android TV / Google TV): minden a távirányítóval, bejelentkezés Quick Connecttel és QR-kóddal, kívánságok és súgó QR-kóddal."
+      ],
+      "en": [
+        "First version of KinoLel for the TV (Android TV / Google TV): everything with the remote, sign-in with Quick Connect and QR code, wishes and help as QR codes."
+      ]
+    }
+  ]
+}

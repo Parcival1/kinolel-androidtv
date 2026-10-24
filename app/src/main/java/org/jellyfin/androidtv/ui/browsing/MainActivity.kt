@@ -17,6 +17,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.jellyfin.androidtv.kinolel.Aktualisierung
+import org.jellyfin.androidtv.kinolel.KinoLelMeldungenAnzeige
+import org.jellyfin.androidtv.kinolel.Neuigkeiten
 import org.jellyfin.androidtv.auth.repository.SessionRepository
 import org.jellyfin.androidtv.auth.repository.UserRepository
 import org.jellyfin.androidtv.integration.LeanbackChannelWorker
@@ -73,6 +76,8 @@ class MainActivity : FragmentActivity() {
 					)
 					InAppScreensaver()
 					MainActivitySettings()
+					// KinoLel: Dialoge (Update, Was ist neu, Nachrichten vom Server) im KinoLel-Stil
+					KinoLelMeldungenAnzeige()
 				}
 			}
 		}
@@ -86,6 +91,10 @@ class MainActivity : FragmentActivity() {
 		applyTheme()
 
 		interactionTrackerViewModel.activityPaused = false
+
+		// KinoLel: einmalig „Was ist neu“ nach einem Update, dann bei jedem Öffnen nach einer neuen Version suchen
+		Neuigkeiten.zeigenFallsNeu(this)
+		lifecycleScope.launch { Aktualisierung.pruefen(this@MainActivity) }
 	}
 
 	private fun validateAuthentication(): Boolean {

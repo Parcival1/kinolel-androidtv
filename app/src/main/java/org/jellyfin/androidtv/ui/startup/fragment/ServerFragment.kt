@@ -152,6 +152,8 @@ class ServerFragment : Fragment() {
 		binding.serverButton.setOnClickListener {
 			navigateFragment<SelectServerFragment>(keepToolbar = true)
 		}
+		// KinoLel: fester Server kinolel.de – kein Serverwechsel
+		binding.serverButton.isVisible = false
 
 		if (!server.versionSupported) {
 			binding.notification.isVisible = true

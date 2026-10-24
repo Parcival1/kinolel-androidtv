@@ -3,12 +3,23 @@ package org.jellyfin.androidtv.ui.base
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
+import org.jellyfin.androidtv.R
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 
 object TypographyDefaults {
-	val Default: TextStyle = TextStyle.Default
+	// KinoLel: Schrift Inter wie auf kinolel.de und in den anderen KinoLel-Apps
+	val KinoLelSchrift = FontFamily(
+		Font(R.font.inter_regular, FontWeight.Normal),
+		Font(R.font.inter_semibold, FontWeight.Medium),
+		Font(R.font.inter_semibold, FontWeight.SemiBold),
+		Font(R.font.inter_semibold, FontWeight.Bold),
+	)
+
+	val Default: TextStyle = TextStyle.Default.copy(fontFamily = KinoLelSchrift)
 
 	val ListHeader: TextStyle = Default.copy(
 		fontSize = 15.sp,

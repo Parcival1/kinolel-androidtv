@@ -22,6 +22,7 @@ import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.flow.filterNotNull
 import org.jellyfin.androidtv.R
+import org.jellyfin.androidtv.kinolel.KinoLelSeiteFragment
 import org.jellyfin.androidtv.auth.repository.SessionRepository
 import org.jellyfin.androidtv.auth.repository.UserRepository
 import org.jellyfin.androidtv.ui.NowPlayingComposable
@@ -49,6 +50,9 @@ enum class MainToolbarActiveButton {
 	User,
 	Home,
 	Search,
+	// KinoLel
+	Wuensche,
+	Hilfe,
 
 	None,
 }
@@ -150,6 +154,25 @@ private fun MainToolbar(
 						},
 						colors = if (activeButton == MainToolbarActiveButton.Search) activeButtonColors else ButtonDefaults.colors(),
 						content = { Text(stringResource(R.string.lbl_search)) }
+					)
+					// KinoLel: Wünsche und Hilfe als QR-Code (Tippen am Fernseher ist unzumutbar)
+					Button(
+						onClick = {
+							if (activeButton != MainToolbarActiveButton.Wuensche) {
+								navigationRepository.navigate(Destinations.kinolelSeite(KinoLelSeiteFragment.WUENSCHE))
+							}
+						},
+						colors = if (activeButton == MainToolbarActiveButton.Wuensche) activeButtonColors else ButtonDefaults.colors(),
+						content = { Text(stringResource(R.string.kinolel_wuensche)) }
+					)
+					Button(
+						onClick = {
+							if (activeButton != MainToolbarActiveButton.Hilfe) {
+								navigationRepository.navigate(Destinations.kinolelSeite(KinoLelSeiteFragment.HILFE))
+							}
+						},
+						colors = if (activeButton == MainToolbarActiveButton.Hilfe) activeButtonColors else ButtonDefaults.colors(),
+						content = { Text(stringResource(R.string.kinolel_hilfe)) }
 					)
 				}
 			}
