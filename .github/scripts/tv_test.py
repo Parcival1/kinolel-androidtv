@@ -340,6 +340,12 @@ def main():
 
     # 6. Tonspur wechseln über die Leiste (♪): Knopfreihe ansteuern, Liste öffnen, die andere Sprache wählen
     vorher = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("AudioStreamIndex")
+    # Jellyfin merkt sich die letzte Tonspur des Kontos -> immer auf die jeweils andere Sprache wechseln
+    spuren = [s for s in ((api.ruf("GET", f"/Items/{film['Id']}?userId={api.user}&fields=MediaStreams") or {}).get("MediaStreams") or [])
+              if s.get("Type") == "Audio"]
+    jetzt_sprache = next((s.get("Language") or "" for s in spuren if s.get("Index") == vorher), "")
+    ziel_muster = r"(?i)german|deutsch|\bdeu\b" if jetzt_sprache.startswith("en") else r"(?i)english|englisch|\beng\b"
+    log(f"Tonspur jetzt {vorher} ({jetzt_sprache}) -> Ziel {'Deutsch' if jetzt_sprache.startswith('en') else 'Englisch'}")
     taste("DPAD_CENTER", pause=1.5)   # Leiste einblenden (OK; Fokus: Wiedergabeleiste)
     for _ in range(4):                # von der Wiedergabeleiste hoch in die Knopfreihe
         f = fokus_roh()
@@ -361,10 +367,10 @@ def main():
         optionen = [t for t in texte(ui()) if re.search(r"(?i)eng|englisch|deu|deutsch", t)]
         log("Tonspuren in der Liste: " + " | ".join(optionen[:6]))
         if optionen:
-            for _ in range(6):
-                if re.search(r"(?i)eng|englisch", fokus()):
+            for schritt_nr in range(6):
+                if re.search(ziel_muster, fokus()):
                     break
-                taste("DPAD_DOWN", pause=0.8)
+                taste("DPAD_DOWN" if schritt_nr < 3 else "DPAD_UP", pause=0.8)
             taste("DPAD_CENTER", pause=4)
             gewechselt = True
     nachher = vorher
@@ -373,7 +379,7 @@ def main():
         if nachher != vorher:
             break
         time.sleep(2)
-    merke("Tonspur wechseln (Englisch)", gewechselt and nachher is not None and nachher != vorher, f"{vorher} -> {nachher}")
+    merke("Tonspur wechseln (andere Sprache)", gewechselt and nachher is not None and nachher != vorher, f"{vorher} -> {nachher}")
 
     # 7. Zurück: erst Leiste, dann Player – so oft, bis die Detailseite da ist (höchstens 5 Drücke)
     # Jellyfin merkt sich eine Stelle erst ab 5 % der Laufzeit (Film 108 min) -> vorher auf 15 min springen
