@@ -137,8 +137,11 @@ def einstellungen_schreiben(werte):
         else:
             eintraege.append(f'<string name="{name}">{wert}</string>')
     inhalt = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?><map>" + "".join(eintraege) + "</map>"
-    subprocess.run(["adb", "shell", "run-as", PAKET, "sh", "-c",
-                    "mkdir -p shared_prefs && cat > shared_prefs/kinolel.xml"], input=inhalt.encode(), timeout=30)
+    # adb shell setzt die Argumente zu EINER Zeile zusammen -> Befehl als ein String mit eigenen Anführungszeichen
+    r = subprocess.run(["adb", "shell", f"run-as {PAKET} sh -c 'mkdir -p shared_prefs && cat > shared_prefs/kinolel.xml'"],
+                       input=inhalt.encode(), capture_output=True, timeout=30)
+    pruef = adb("shell", f"run-as {PAKET} cat shared_prefs/kinolel.xml")
+    log(f"Einstellungen geschrieben: {sorted(werte)} – {'ok' if all(n in pruef for n in werte) else 'FEHLT: ' + (r.stderr.decode()[:200] or pruef[:200])}")
 
 
 # --- Jellyfin-Schnittstelle (spielt das Handy, das Quick Connect bestätigt, und den Server) ----------------------
@@ -247,7 +250,11 @@ def main():
     xml = ui()
     zeilen = [w for w in ("Weiter ansehen", "Als Nächstes") if any(w in t for t in texte(xml))]
     merke("Startseite geladen", xml is not None and any("Kürzlich" in t or "Meine Medien" in t or "Weiter" in t for t in texte(xml)))
-    merke("Startseite: Zeilen Weiter ansehen / Als Nächstes", len(zeilen) == 2, ", ".join(zeilen) or "keine (Konto ohne laufende Titel?)")
+    # „Weiter ansehen“ gibt es nur, wenn das Konto etwas angefangen hat (Server fragen) – sonst zeigt Jellyfin die Zeile nicht
+    angefangen = len((api.ruf("GET", f"/UserItems/Resume?userId={api.user}&limit=1&mediaTypes=Video") or {}).get("Items", []))
+    erwartet = ["Weiter ansehen", "Als Nächstes"] if angefangen else ["Als Nächstes"]
+    merke("Startseite: Zeilen Weiter ansehen / Als Nächstes", all(w in zeilen for w in erwartet),
+          ", ".join(zeilen) + ("" if angefangen else " (Konto hat nichts angefangen -> ohne „Weiter ansehen“)"))
     merke("Startseite: Fokus erkennbar", bool(fokus(xml)), fokus(xml))
 
     # 3. Kopfleiste: Wünsche und Hilfe nur mit dem Steuerkreuz
@@ -257,12 +264,13 @@ def main():
             if fokus() in ("Startseite", "Suche", "Wünsche", "Hilfe"):
                 break
             taste("DPAD_UP")
-        for _ in range(8):  # nach rechts bis zum Ziel
+        reihe = ["Startseite", "Suche", "Wünsche", "Hilfe"]
+        for _ in range(8):  # seitwärts bis zum Ziel
             f = fokus()
             if f == ziel:
                 gefunden = True
                 break
-            taste("DPAD_RIGHT" if f in ("Startseite", "Suche") or not f else "DPAD_LEFT")
+            taste("DPAD_LEFT" if f in reihe and reihe.index(f) > reihe.index(ziel) else "DPAD_RIGHT")
         if gefunden:
             taste("DPAD_CENTER", pause=2)
         xml = warte_auf(enthaelt(kennzeichen), 20)
@@ -277,6 +285,8 @@ def main():
         merke("Testfilm gefunden", False, TESTFILM)
         return
     app_start(("--es", "ItemId", film["Id"]))
+    vorne = re.search(r"topResumedActivity[^\n]*", adb("shell", "dumpsys", "activity", "activities"))
+    log("Nach Aufruf der Detailseite vorne: " + (vorne[0][:140] if vorne else "?"))
     xml = warte_auf(enthaelt(TESTFILM), 60)
     time.sleep(3)
     bild("05-details")
@@ -409,7 +419,7 @@ finally:
     try:
         roh = subprocess.run(["adb", "shell", "run-as", PAKET, "cat", "files/authentication_store.json"],
                              capture_output=True, timeout=20).stdout.decode()
-        for t in set(re.findall(r'"accessToken"\s*:\s*"([0-9a-f]{32})"', roh)):
+        for t in set(re.findall(r'"access_token"\s*:\s*"([0-9a-f]{32})"', roh)):
             api.abmelden(token=t)
             log("TV-Sitzung abgemeldet")
     except Exception as e:
@@ -417,8 +427,11 @@ finally:
     if api.token:
         api.abmelden()
         log("Hilfssitzung abgemeldet")
+    # ohne die Masse an uiautomator-/Fenster-Zeilen, damit der ganze Lauf hineinpasst
+    zeilen = [z for z in adb("logcat", "-d", timeout=60).splitlines()
+              if "AccessibilityNodeInfoDumper" not in z and " V WindowManager" not in z and " V ShellTransitions" not in z]
     with open(os.path.join(AUS, "logcat.txt"), "w", encoding="utf-8") as f:
-        f.write(adb("logcat", "-d", timeout=60)[-400000:])
+        f.write("\n".join(zeilen)[-1500000:])
     with open(os.path.join(AUS, "ergebnis.json"), "w", encoding="utf-8") as f:
         json.dump(ergebnis, f, ensure_ascii=False, indent=1)
     fehler = [k for k, v in ergebnis.items() if not v["ok"]]
