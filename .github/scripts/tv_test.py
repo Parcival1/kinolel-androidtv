@@ -204,9 +204,14 @@ api = Api()
 def test_server(apps_json):
     class Antwort(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
-            body = json.dumps(apps_json).encode()
+            if self.path.endswith(".apk"):  # die Test-APK selbst als „neue Version“
+                body = open(APK, "rb").read()
+                art = "application/vnd.android.package-archive"
+            else:
+                body = json.dumps(apps_json).encode()
+                art = "application/json"
             self.send_response(200)
-            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Type", art)
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
@@ -367,10 +372,12 @@ def main():
         optionen = [t for t in texte(ui()) if re.search(r"(?i)eng|englisch|deu|deutsch", t)]
         log("Tonspuren in der Liste: " + " | ".join(optionen[:6]))
         if optionen:
-            for schritt_nr in range(6):
-                if re.search(ziel_muster, fokus()):
-                    break
-                taste("DPAD_DOWN" if schritt_nr < 3 else "DPAD_UP", pause=0.8)
+            # Liste in Server-Reihenfolge, Fokus beginnt oben -> so oft runter, wie die Zielspur in der Liste steht
+            ziel_pos = next((i for i, s in enumerate(spuren) if re.search(ziel_muster, s.get("DisplayTitle") or s.get("Language") or "")), 1)
+            log(f"Tonspur-Ziel an Position {ziel_pos + 1} von {len(spuren)}")
+            for _ in range(ziel_pos):
+                taste("DPAD_DOWN", pause=0.8)
+            bild("07e-tonspur-ziel")
             taste("DPAD_CENTER", pause=4)
             gewechselt = True
     nachher = vorher
@@ -509,8 +516,11 @@ def main():
     else:
         merke("Nächste Folge: passende Folge gefunden", False, "keine Serie mit weiterer Folge in „Als Nächstes“")
 
-    # 10. Update-Hinweis mit Test-apps.json (Version 9.9.9)
-    server = test_server({"androidtv": {"version": "9.9.9", "url": "http://10.0.2.2:8765/nicht-da.apk"}})
+    # 10. Update mit Test-apps.json (Version 9.9.9, APK = diese Test-APK): Hinweis -> „Jetzt aktualisieren“ -> Download ->
+    #     Androids Abfrage „App aktualisieren?“ -> bestätigen -> App neu installiert. Alles per Tastendruck.
+    adb("shell", "appops", "set", PAKET, "REQUEST_INSTALL_PACKAGES", "allow")
+    vorher_inst = re.search(r"lastUpdateTime=([^\n]+)", adb("shell", "dumpsys", "package", PAKET))
+    server = test_server({"androidtv": {"version": "9.9.9", "url": "http://10.0.2.2:8765/kinolel-tv-test.apk"}})
     app_stopp()
     einstellungen_schreiben({"apps_liste": "http://10.0.2.2:8765/apps.json", "neuigkeiten_gesehen": "99.0.0"})
     app_start()
@@ -519,7 +529,26 @@ def main():
     bild("11-update-hinweis")
     merke("Update-Hinweis (Test-apps.json 9.9.9)", xml is not None and "9.9.9" in " ".join(texte(xml or "")),
           "Fokus: " + fokus(xml or ""))
-    taste("BACK", pause=2)  # = Später
+    if xml is not None:
+        taste("DPAD_CENTER", pause=3)  # „Jetzt aktualisieren“ hat den Fokus
+        abfrage = warte_auf(lambda x: ("packageinstaller" in x)
+                            and any(re.search(r"(?i)update|aktualisieren|installieren|install", t) for t in texte(x)), 90, takt=3)
+        bild("11b-android-abfrage")
+        if abfrage:
+            # Knopf „Aktualisieren“/„Update“ ansteuern (Abbrechen steht meist links)
+            for _ in range(4):
+                if re.search(r"(?i)^(update|aktualisieren|installieren|install)$", fokus()):
+                    break
+                taste("DPAD_RIGHT", pause=0.8)
+            log("Installationsabfrage, Fokus: " + fokus())
+            taste("DPAD_CENTER", pause=10)
+        nachher_inst = re.search(r"lastUpdateTime=([^\n]+)", adb("shell", "dumpsys", "package", PAKET))
+        merke("Update: Download + Installation über die Android-Abfrage",
+              bool(abfrage) and vorher_inst and nachher_inst and vorher_inst[1] != nachher_inst[1],
+              f"{vorher_inst and vorher_inst[1]} -> {nachher_inst and nachher_inst[1]}")
+        bild("11c-nach-update")
+    else:
+        taste("BACK", pause=2)  # = Später
     server.shutdown()
 
     # 11. „Was ist neu“ einmal nach einem Update (zuletzt gesehen: 0.0.9)

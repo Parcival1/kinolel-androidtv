@@ -8,4 +8,10 @@
         <item name="android:textColor">#F1F2FA</item>
         <item name="android:fontFamily">@font/inter</item>
     </style>
+
+    <!-- Menülisten (PopupMenu): Fokus deutlich -->
+    <style name="KinoLel.DropDownListView" parent="android:Widget.Material.ListView.DropDown">
+        <item name="android:listSelector">@drawable/kinolel_listen_auswahl</item>
+        <item name="android:drawSelectorOnTop">false</item>
+    </style>
 </resources>

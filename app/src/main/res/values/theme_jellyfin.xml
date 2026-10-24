@@ -2,6 +2,9 @@
 <resources>
 
     <style name="Theme.Jellyfin" parent="@style/Theme.AppCompat.Leanback">
+        <!-- KinoLel: Fokus in Menülisten und Hervorhebungen deutlich (Indigo statt fast unsichtbarem Grau) -->
+        <item name="android:dropDownListViewStyle">@style/KinoLel.DropDownListView</item>
+        <item name="android:colorControlHighlight">#806C72EE</item>
         <!-- KinoLel: Schrift Inter -->
         <item name="android:fontFamily">@font/inter</item>
         <item name="fontFamily">@font/inter</item>

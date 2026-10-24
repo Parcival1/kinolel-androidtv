@@ -1,6 +1,21 @@
 {
   "versionen": [
     {
+      "version": "0.1.1",
+      "de": [
+        "Wo du gerade bist, ist jetzt überall deutlich zu sehen – auch in der Leiste beim Abspielen und in den Listen für Tonspur und Untertitel.",
+        "Startet jemand von einem anderen Gerät aus einen Film auf dem Fernseher, stürzt die App nicht mehr ab."
+      ],
+      "hu": [
+        "Mostantól mindenhol jól látszik, hol vagy – lejátszás közben a sávban, valamint a hangsáv- és feliratlistákban is.",
+        "Ha valaki egy másik eszközről indít filmet a tévén, az alkalmazás már nem omlik össze."
+      ],
+      "en": [
+        "You can now clearly see where you are everywhere – including the bar while watching and the audio and subtitle lists.",
+        "The app no longer crashes when someone starts a movie on the TV from another device."
+      ]
+    },
+    {
       "version": "0.1.0",
       "de": [
         "Erste Version von KinoLel für den Fernseher (Android TV / Google TV): alles mit der Fernbedienung, Anmeldung per Quick Connect und QR-Code, Wünsche und Hilfe als QR-Code."

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KinoLel: Fokus in Menülisten (Tonspur, Untertitel, Kontextmenü) deutlich – Indigo-Fläche mit Lavendel-Rand -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:exitFadeDuration="@android:integer/config_shortAnimTime">
+    <item android:state_focused="true">
+        <shape>
+            <solid android:color="#CC6C72EE" />
+            <stroke
+                android:width="2dp"
+                android:color="#9AA4FF" />
+        </shape>
+    </item>
+    <item android:state_selected="true">
+        <shape>
+            <solid android:color="#CC6C72EE" />
+            <stroke
+                android:width="2dp"
+                android:color="#9AA4FF" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape>
+            <solid android:color="#996C72EE" />
+        </shape>
+    </item>
+    <item android:drawable="@android:color/transparent" />
+</selector>
