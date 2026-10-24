@@ -16,6 +16,7 @@ import org.jellyfin.androidtv.ui.playback.PlaybackLauncher
 import org.jellyfin.androidtv.util.PlaybackHelper
 import org.jellyfin.androidtv.util.apiclient.Response
 import org.jellyfin.sdk.api.client.ApiClient
+import org.jellyfin.sdk.api.client.exception.ApiClientException
 import org.jellyfin.sdk.api.client.extensions.instantMixApi
 import org.jellyfin.sdk.api.client.extensions.itemsApi
 import org.jellyfin.sdk.api.client.extensions.liveTvApi
@@ -31,6 +32,7 @@ import org.jellyfin.sdk.model.extensions.ticks
 import java.util.UUID
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import timber.log.Timber
 
 class SdkPlaybackHelper(
 	private val api: ApiClient,
@@ -291,12 +293,22 @@ class SdkPlaybackHelper(
 				userPreferences[UserPreferences.resumeSubtractDuration].toIntOrNull()?.seconds
 					?: Duration.ZERO
 
-			val items = withContext(Dispatchers.IO) {
-				val response by api.itemsApi.getItems(
-					ids = itemIds,
-				)
-				response.items
+			// KinoLel: Startet der Server eine Serienfolge (z. B. vom Handy aus), schickt er alle folgenden Folgen mit –
+			// bei langen Serien Hunderte. In einer Abfrage wurde die Adresse zu lang, der Server brach ab und die App stürzte
+			// ab (unbehandelte Ausnahme in launch). Jetzt in Paketen laden, Reihenfolge wie geschickt, Fehler nur melden.
+			val items = try {
+				withContext(Dispatchers.IO) {
+					val reihenfolge = itemIds.withIndex().associate { (index, id) -> id to index }
+					itemIds.chunked(KINOLEL_IDS_JE_ABFRAGE).flatMap { paket ->
+						val response by api.itemsApi.getItems(ids = paket)
+						response.items
+					}.sortedBy { reihenfolge[it.id] ?: Int.MAX_VALUE }
+				}
+			} catch (err: ApiClientException) {
+				Timber.w(err, "KinoLel: Titel zum Abspielen nicht geladen (${itemIds.size} Titel)")
+				return@launch
 			}
+			if (items.isEmpty()) return@launch
 
 			val pos = position?.ticks ?: items[0].userData?.playbackPositionTicks?.ticks?.minus(
 				resumeSubtractDuration
@@ -336,3 +348,6 @@ class SdkPlaybackHelper(
 		else -> ProcessLifecycleOwner.get().lifecycleScope
 	}
 }
+
+/** KinoLel: höchstens so viele Titel je Abfrage (Adresse bleibt kurz genug für Server und Proxy). */
+private const val KINOLEL_IDS_JE_ABFRAGE = 50

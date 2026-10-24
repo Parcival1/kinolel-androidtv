@@ -1,6 +1,21 @@
 {
  "versionen": [
   {
+   "version": "0.1.2",
+   "de": [
+    "Anmelden per QR-Code: Mit der Handy-Kamera gescannt, öffnet sich jetzt direkt die KinoLel-App (Android) mit eingetragenem Code – nur noch „Autorisieren“ tippen. Ohne App öffnet sich der Browser.",
+    "Startet jemand vom Handy aus eine Folge einer langen Serie auf dem Fernseher, stürzt die App nicht mehr ab."
+   ],
+   "hu": [
+    "Bejelentkezés QR-kóddal: a telefon kamerájával beolvasva most közvetlenül a KinoLel alkalmazás nyílik meg (Android) a beírt kóddal – csak az „Engedélyezés” gombra kell koppintani. Alkalmazás nélkül a böngésző nyílik meg.",
+    "Ha valaki a telefonjáról egy hosszú sorozat epizódját indítja el a tévén, az alkalmazás már nem omlik össze."
+   ],
+   "en": [
+    "Sign in with the QR code: scanned with your phone camera, it now opens the KinoLel app directly (Android) with the code filled in – just tap “Authorize”. Without the app, the browser opens.",
+    "Starting an episode of a long series on the TV from a phone no longer crashes the app."
+   ]
+  },
+  {
    "version": "0.1.1",
    "de": [
     "Oben links steht jetzt das KinoLel-Logo mit Namen, und der Hintergrund ist überall im neuen dunklen KinoLel-Design.",

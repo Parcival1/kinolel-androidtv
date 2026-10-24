@@ -20,8 +20,12 @@ object Marke {
 	/** Einstellungen der KinoLel-Zusätze (nur auf diesem Gerät). */
 	const val EINSTELLUNGEN = "kinolel"
 
-	/** Quick Connect am Handy: Jellyfins Seite übernimmt den Code aus der Adresse. */
-	fun quickConnectAdresse(code: String) = "$SERVER/web/#/quickconnect?code=$code"
+	/**
+	 * Quick Connect am Handy (Lel 24.10.): Mit KinoLel-Android-App öffnet der Link direkt die App (App Link für
+	 * /web/kinolel/qc, Fragmente wie #/quickconnect zählen dafür nicht), sonst leitet qc.html im Browser auf Jellyfins
+	 * Quick-Connect-Seite weiter. Beide tragen den Code ein, „Autorisieren“ tippt der Nutzer selbst.
+	 */
+	fun quickConnectAdresse(code: String) = "$SERVER/web/kinolel/qc.html?code=$code"
 
 	/** Sprache der Oberfläche: folgt der Sprache des Fernsehers (Jellyfin speichert keine Sprache je Benutzer). */
 	fun sprache(context: Context): String = when (ConfigurationCompat.getLocales(context.resources.configuration)[0]?.language) {

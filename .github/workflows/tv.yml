@@ -119,6 +119,9 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      - name: QR-Leser für den Test (QR-Code der Anmeldung prüfen)
+        run: pip3 install --quiet zxing-cpp pillow
+
       - name: Android-TV-Emulator (API 34, 1080p) – Test nur mit Tastendrücken
         env:
           KINOLEL_TEST_PW: ${{ secrets.KINOLEL_TEST_PW }}

@@ -241,6 +241,16 @@ def main():
     code = next((t.replace(" ", "") for t in texte(xml or "") if re.fullmatch(r"\d{3} \d{3}", t)), None)
     merke("Anmeldung: Quick-Connect-Code sichtbar", code is not None)
     merke("Anmeldung: QR-Code sichtbar", bool(xml) and "kinolel.quickconnect.qr" in xml)
+    # Inhalt des QR-Codes aus dem Bildschirmfoto lesen (Lel 24.10.: öffnet am Handy die KinoLel-App bzw. den Browser)
+    try:
+        import zxingcpp
+        from PIL import Image
+        gelesen = [t.text for t in zxingcpp.read_barcodes(Image.open(os.path.join(AUS, "01-anmeldung-quickconnect.png")))]
+    except Exception as e:  # noqa: BLE001
+        gelesen = [f"nicht lesbar: {type(e).__name__}: {e}"]
+    erwartet = f"https://kinolel.de/web/kinolel/qc.html?code={code}"
+    merke("Anmeldung: QR-Code enthält kinolel.de/web/kinolel/qc.html mit dem angezeigten Code",
+          bool(code) and erwartet in gelesen, ", ".join(gelesen)[:160])
     # Lel 24.10.: „… aber auch mit Tippen möglich machen“ – Passwort-Weg gleichwertig daneben, Fokus im Benutzernamen
     merke("Anmeldung: Benutzername/Passwort daneben", bool(xml) and any("Mit Benutzername und Passwort" in t for t in texte(xml)),
           "Fokus: " + fokus(xml or ""))
