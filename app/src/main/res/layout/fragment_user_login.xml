@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- KinoLel (Lel 24.10.: „Anmeldung ohne Tippen: aber auch mit Tippen möglich machen.“): beide Wege gleichwertig
+     nebeneinander – links Quick Connect (Code + QR-Code), rechts Benutzername/Passwort (Bildschirm- oder echte Tastatur). -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,18 +13,22 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintGuide_percent="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintGuide_percent="0.53" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/qr_start"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.30" />
 
     <ImageView
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:importantForAccessibility="no"
         android:src="@color/black_transparent_light"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/center"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -35,7 +41,7 @@
         android:layout_marginTop="27dp"
         android:layout_marginEnd="48dp"
         android:text="@string/lbl_sign_in"
-        app:layout_constraintEnd_toStartOf="@id/center"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -46,23 +52,79 @@
         android:layout_marginStart="48dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="48dp"
-        app:layout_constraintEnd_toStartOf="@id/center"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title"
         tools:text="@string/login_connect_to" />
+
+    <!-- links: ohne Tippen -->
+    <TextView
+        android:id="@+id/kinolel_titel_quickconnect"
+        style="@style/KinoLel.Anmeldung.Ueberschrift"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="22dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/kinolel_anmelden_ohne_tippen"
+        app:layout_constraintEnd_toStartOf="@id/center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subtitle" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/login_method"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="48dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@id/actions"
+        app:layout_constraintEnd_toStartOf="@id/qr_start"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/kinolel_titel_quickconnect"
+        tools:name="org.jellyfin.androidtv.ui.startup.fragment.UserLoginQuickConnectFragment" />
+
+    <!-- QR-Code: am Handy scannen, der Code ist schon eingetragen -->
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/kinolel_qr"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@id/actions"
+        app:layout_constraintEnd_toStartOf="@id/center"
+        app:layout_constraintStart_toEndOf="@id/qr_start"
+        app:layout_constraintTop_toBottomOf="@id/kinolel_titel_quickconnect" />
+
+    <!-- rechts: mit Tippen -->
+    <TextView
+        android:id="@+id/kinolel_titel_passwort"
+        style="@style/KinoLel.Anmeldung.Ueberschrift"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="22dp"
+        android:layout_marginEnd="48dp"
+        android:text="@string/kinolel_anmelden_mit_passwort"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/center"
+        app:layout_constraintTop_toBottomOf="@id/subtitle" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/kinolel_passwort"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="48dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@id/actions"
-        app:layout_constraintEnd_toStartOf="@id/center"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/subtitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/center"
+        app:layout_constraintTop_toBottomOf="@id/kinolel_titel_passwort"
         tools:name="org.jellyfin.androidtv.ui.startup.fragment.UserLoginCredentialsFragment" />
 
     <LinearLayout
@@ -72,49 +134,34 @@
         android:layout_marginStart="48dp"
         android:layout_marginEnd="48dp"
         android:layout_marginBottom="27dp"
+        android:gravity="end"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/center"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/login_other_options" />
-
+        <!-- Umschalter aus der Jellyfin-App: bei KinoLel unsichtbar (beide Wege stehen nebeneinander) -->
         <Button
             android:id="@+id/use_credentials"
             style="@style/Button.Default"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/action_use_password" />
+            android:text="@string/action_use_password"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/use_quickconnect"
             style="@style/Button.Default"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/action_use_quickconnect" />
+            android:text="@string/action_use_quickconnect"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/cancel"
             style="@style/Button.Default"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:text="@string/btn_cancel"
             tools:ignore="ButtonOrder" />
     </LinearLayout>
-
-    <!-- KinoLel: QR-Code für Quick Connect (rechte Hälfte): am Handy scannen, der Code ist schon eingetragen -->
-    <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/kinolel_qr"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/center"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

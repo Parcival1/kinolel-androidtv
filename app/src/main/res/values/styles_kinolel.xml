@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KinoLel TV: eigene Stile -->
+<resources>
+    <!-- Überschriften der beiden Anmeldewege (links ohne Tippen, rechts mit Passwort) -->
+    <style name="KinoLel.Anmeldung.Ueberschrift" parent="">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#F1F2FA</item>
+        <item name="android:fontFamily">@font/inter</item>
+    </style>
+</resources>

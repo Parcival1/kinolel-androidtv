@@ -21,10 +21,12 @@
     <string name="kinolel_wuensche_text">Missing a movie or show? Scan the code with your phone and request it on the KinoLel wish portal. Sign in there with your KinoLel account – you\'ll be notified as soon as it\'s available.</string>
     <string name="kinolel_hilfe">Help</string>
     <string name="kinolel_hilfe_bedienung">Controls: Move with the D-pad, OK selects. Hold OK to open the menu (watched, favorite, go to series). Back goes one level back – while watching it first closes the bar, then the video. While watching, left/right seeks and preview images show where you are. Audio and subtitles are in the bar (press OK).</string>
-    <string name="kinolel_hilfe_anmelden">Sign in without typing: the TV shows a code and a QR code. Scan it with your phone (or open kinolel.de → Settings → Quick Connect) and confirm. Switch accounts with the profile picture at the top left.</string>
+    <string name="kinolel_hilfe_anmelden">Sign in: on the left without typing – scan the QR code with your phone (or open kinolel.de → Settings → Quick Connect) and confirm. On the right with username and password – with the on-screen keyboard or a Bluetooth/phone keyboard. Switch accounts with the profile picture at the top left.</string>
     <string name="kinolel_hilfe_updates">Updates: KinoLel checks for a new version on every start. Once, KinoLel needs permission to install apps: Settings → Apps → Security &amp; restrictions → Unknown sources → turn on KinoLel.</string>
     <string name="kinolel_hilfe_qr">Help on kinolel.de</string>
     <string name="kinolel_keine_verbindung">KinoLel can\'t be reached right now. Please check the TV\'s internet connection – the app will try again shortly.</string>
     <string name="kinolel_erneut_versuchen">Try again</string>
     <string name="kinolel_quickconnect_qr">Scan with your phone – the code is already filled in, you just need to confirm.</string>
+    <string name="kinolel_anmelden_ohne_tippen">Without typing (Quick Connect)</string>
+    <string name="kinolel_anmelden_mit_passwort">With username and password</string>
 </resources>

@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
@@ -33,6 +32,7 @@ class UserLoginFragment : Fragment() {
 		const val ARG_SERVER_ID = "server_id"
 		const val ARG_SKIP_QUICKCONNECT = "skip_quickconnect"
 		const val TAG_LOGIN_METHOD = "login_method"
+		const val TAG_PASSWORT = "kinolel_passwort"
 	}
 
 	private val userLoginViewModel: UserLoginViewModel by activityViewModel()
@@ -62,8 +62,6 @@ class UserLoginFragment : Fragment() {
 		// KinoLel: erste Anmeldung auf dem Fernseher -> nichts, wohin „Abbrechen“ zurückführen könnte
 		binding.cancel.isVisible = parentFragmentManager.backStackEntryCount > 0
 		binding.kinolelQr.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-		binding.useCredentials.setOnClickListener { setLoginMethod<UserLoginCredentialsFragment>() }
-		binding.useQuickconnect.setOnClickListener { setLoginMethod<UserLoginQuickConnectFragment>() }
 
 		return binding.root
 	}
@@ -73,9 +71,15 @@ class UserLoginFragment : Fragment() {
 
 		userLoginViewModel.clearLoginState()
 
-		// Open initial fragment
-		if (skipQuickConnect) setLoginMethod<UserLoginCredentialsFragment>()
-		else setLoginMethod<UserLoginQuickConnectFragment>()
+		// KinoLel (Lel 24.10.: „aber auch mit Tippen möglich machen“): beide Wege gleichzeitig – links Quick Connect,
+		// rechts Benutzername/Passwort (Fokus startet dort; Bildschirmtastatur oder Bluetooth-/Handy-Tastatur)
+		if (childFragmentManager.findFragmentByTag(TAG_LOGIN_METHOD) == null) {
+			childFragmentManager.commit {
+				if (!skipQuickConnect) replace<UserLoginQuickConnectFragment>(binding.loginMethod.id, TAG_LOGIN_METHOD)
+				replace<UserLoginCredentialsFragment>(binding.kinolelPasswort.id, TAG_PASSWORT)
+			}
+		}
+		quickConnectAktiv = !skipQuickConnect
 
 		lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -88,10 +92,13 @@ class UserLoginFragment : Fragment() {
 					else backgroundService.clearBackgrounds()
 				}.launchIn(this)
 
-				// Disable QuickConnect when unavailable
+				// Quick Connect auf dem Server aus -> linke Hälfte ausblenden, nur Passwort
 				userLoginViewModel.quickConnectState.onEach { state ->
-					binding.useQuickconnect.isEnabled = state != UnavailableQuickConnectState
-					if (state == UnavailableQuickConnectState) setLoginMethod<UserLoginCredentialsFragment>()
+					if (state == UnavailableQuickConnectState) {
+						quickConnectAktiv = false
+						binding.loginMethod.isVisible = false
+						binding.kinolelTitelQuickconnect.isVisible = false
+					}
 
 					// KinoLel: QR-Code zum Code
 					quickConnectCode = (state as? PendingQuickConnectState)?.code
@@ -110,28 +117,11 @@ class UserLoginFragment : Fragment() {
 	private var quickConnectCode: String? = null
 	private var quickConnectAktiv = false
 
-	/** KinoLel: QR-Code rechts nur bei Quick Connect und wenn ein Code da ist. */
+	/** KinoLel: QR-Code neben dem Quick-Connect-Code, sobald ein Code da ist. */
 	private fun qrAktualisieren() {
 		val code = quickConnectCode
 		val sichtbar = quickConnectAktiv && code != null
-		binding.kinolelQr.isVisible = sichtbar
+		binding.kinolelQr.visibility = if (sichtbar) View.VISIBLE else View.INVISIBLE
 		if (sichtbar) binding.kinolelQr.setContent { KinoLelQuickConnectQr(code!!) }
-	}
-
-	private inline fun <reified T : Fragment> setLoginMethod() {
-		val currentFragment = childFragmentManager.findFragmentByTag(TAG_LOGIN_METHOD)
-		if (currentFragment is T) return
-
-		childFragmentManager.commit {
-			setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-			replace<T>(binding.loginMethod.id, TAG_LOGIN_METHOD)
-		}
-
-		// Hide button for active fragment
-		binding.useCredentials.isVisible = T::class != UserLoginCredentialsFragment::class
-		binding.useQuickconnect.isVisible = T::class != UserLoginQuickConnectFragment::class
-
-		quickConnectAktiv = T::class == UserLoginQuickConnectFragment::class
-		qrAktualisieren()
 	}
 }

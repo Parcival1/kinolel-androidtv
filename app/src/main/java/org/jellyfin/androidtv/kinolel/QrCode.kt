@@ -64,21 +64,24 @@ fun QrCode(text: String, groesse: Dp, modifier: Modifier = Modifier) {
 /** Quick Connect: QR-Code öffnet am Handy kinolel.de mit schon eingetragenem Code – dort nur noch „Bestätigen“. */
 @Composable
 fun KinoLelQuickConnectQr(code: String) {
-	androidx.compose.foundation.layout.Column(
-		horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-		verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+	androidx.compose.foundation.layout.BoxWithConstraints(
 		modifier = Modifier
 			.fillMaxSize()
 			.semantics { contentDescription = "kinolel.quickconnect.qr" },
 	) {
-		QrCode(text = Marke.quickConnectAdresse(code), groesse = 280.dp)
-		androidx.compose.foundation.layout.Spacer(Modifier.size(18.dp))
-		org.jellyfin.androidtv.ui.base.Text(
-			text = androidx.compose.ui.res.stringResource(org.jellyfin.androidtv.R.string.kinolel_quickconnect_qr),
-			color = KinoLelFarben.Text,
-			fontSize = 20.sp,
-			textAlign = TextAlign.Center,
-			modifier = Modifier.widthIn(max = 420.dp),
-		)
+		// so groß wie die Spalte erlaubt (Platz für die Zeile darunter lassen), höchstens 240 dp
+		val seite = minOf(maxWidth - 28.dp, maxHeight - 90.dp, 240.dp)
+		androidx.compose.foundation.layout.Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+			QrCode(text = Marke.quickConnectAdresse(code), groesse = seite)
+			androidx.compose.foundation.layout.Spacer(Modifier.size(10.dp))
+			org.jellyfin.androidtv.ui.base.Text(
+				text = androidx.compose.ui.res.stringResource(org.jellyfin.androidtv.R.string.kinolel_quickconnect_qr),
+				color = KinoLelFarben.TextLeise,
+				fontSize = 15.sp,
+				lineHeight = 20.sp,
+				textAlign = TextAlign.Center,
+				modifier = Modifier.widthIn(max = seite + 28.dp),
+			)
+		}
 	}
 }

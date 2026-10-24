@@ -20,6 +20,8 @@ import kotlinx.coroutines.launch
 import org.jellyfin.androidtv.kinolel.Aktualisierung
 import org.jellyfin.androidtv.kinolel.KinoLelMeldungenAnzeige
 import org.jellyfin.androidtv.kinolel.Neuigkeiten
+import org.jellyfin.androidtv.kinolel.Sprache
+import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.androidtv.auth.repository.SessionRepository
 import org.jellyfin.androidtv.auth.repository.UserRepository
 import org.jellyfin.androidtv.integration.LeanbackChannelWorker
@@ -43,6 +45,7 @@ class MainActivity : FragmentActivity() {
 	private val userRepository by inject<UserRepository>()
 	private val interactionTrackerViewModel by viewModel<InteractionTrackerViewModel>()
 	private val workManager by inject<WorkManager>()
+	private val kinolelApi by inject<ApiClient>()
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		applyTheme()
@@ -95,6 +98,8 @@ class MainActivity : FragmentActivity() {
 		// KinoLel: einmalig „Was ist neu“ nach einem Update, dann bei jedem Öffnen nach einer neuen Version suchen
 		Neuigkeiten.zeigenFallsNeu(this)
 		lifecycleScope.launch { Aktualisierung.pruefen(this@MainActivity) }
+		// KinoLel: Sprache des Kontos (Deutsch/Magyar wie auf kinolel.de gewählt)
+		lifecycleScope.launch { Sprache.ausKonto(this@MainActivity, kinolelApi) }
 	}
 
 	private fun validateAuthentication(): Boolean {

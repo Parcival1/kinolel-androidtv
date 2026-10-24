@@ -159,7 +159,7 @@ class SocketHandler(
 				val text by message
 				val string by message
 
-				onDisplayMessage(header, text ?: string, message.entries.firstOrNull { it.key.equals("TimeoutMs", true) }?.value?.toLongOrNull())
+				onDisplayMessage(header, text ?: string, (message["TimeoutMs"] ?: message["timeoutMs"])?.toLongOrNull())
 			}
 			.launchIn(coroutineScope)
 	}

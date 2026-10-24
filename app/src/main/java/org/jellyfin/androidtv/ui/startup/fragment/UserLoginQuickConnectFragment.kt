@@ -77,7 +77,8 @@ class UserLoginQuickConnectFragment : Fragment() {
 						)
 
 						AuthenticatingState -> binding.error.setText(R.string.login_authenticating)
-						RequireSignInState -> binding.error.setText(R.string.login_invalid_credentials)
+						// KinoLel: falsches Passwort betrifft nur die rechte Hälfte (Benutzername/Passwort)
+						RequireSignInState -> binding.error.text = null
 						ServerUnavailableState,
 						is ApiClientErrorLoginState -> binding.error.setText(R.string.login_server_unavailable)
 						// Do nothing because the activity will respond to the new session

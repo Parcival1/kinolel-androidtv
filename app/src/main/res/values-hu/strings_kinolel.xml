@@ -21,10 +21,12 @@
     <string name="kinolel_wuensche_text">Hiányzik egy film vagy sorozat? Olvasd be a kódot a telefonoddal, és kérd a KinoLel kívánságportálján. A KinoLel-fiókoddal jelentkezel be – amint elérhető, szólunk.</string>
     <string name="kinolel_hilfe">Súgó</string>
     <string name="kinolel_hilfe_bedienung">Kezelés: A nyílgombokkal mozogsz, az OK gombbal választasz. Az OK hosszú lenyomása megnyitja a menüt (megnézve, kedvenc, ugrás a sorozathoz). A Vissza gomb egy szinttel visszalép – film közben előbb a sávot zárja be, aztán a filmet. Film közben balra/jobbra tekersz, az előnézeti képek mutatják, hol vagy. A hangsávot és a feliratot a sávban találod (OK gomb).</string>
-    <string name="kinolel_hilfe_anmelden">Bejelentkezés gépelés nélkül: A tévé egy kódot és egy QR-kódot mutat. Olvasd be a telefonoddal (vagy nyisd meg: kinolel.de → Beállítások → Quick Connect), és hagyd jóvá. Másik fiókot a bal felső profilképnél választhatsz.</string>
+    <string name="kinolel_hilfe_anmelden">Bejelentkezés: balra gépelés nélkül – olvasd be a QR-kódot a telefonoddal (vagy kinolel.de → Beállítások → Quick Connect), és hagyd jóvá. Jobbra felhasználónévvel és jelszóval – a képernyő-billentyűzettel vagy Bluetooth-/telefonos billentyűzettel. Másik fiókot a bal felső profilképnél választhatsz.</string>
     <string name="kinolel_hilfe_updates">Frissítések: A KinoLel minden indításkor keres új verziót. Egyszer engedélyezni kell, hogy a KinoLel alkalmazásokat telepíthessen: Beállítások → Alkalmazások → Biztonság és korlátozások → Ismeretlen források → KinoLel bekapcsolása.</string>
     <string name="kinolel_hilfe_qr">Súgó a kinolel.de oldalon</string>
     <string name="kinolel_keine_verbindung">A KinoLel most nem érhető el. Ellenőrizd a tévé internetkapcsolatát – az alkalmazás hamarosan újra próbálkozik.</string>
     <string name="kinolel_erneut_versuchen">Újrapróbálás</string>
     <string name="kinolel_quickconnect_qr">Olvasd be a telefonoddal – a kód már ki van töltve, csak jóvá kell hagynod.</string>
+    <string name="kinolel_anmelden_ohne_tippen">Gépelés nélkül (Quick Connect)</string>
+    <string name="kinolel_anmelden_mit_passwort">Felhasználónévvel és jelszóval</string>
 </resources>

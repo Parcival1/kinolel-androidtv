@@ -223,6 +223,9 @@ def main():
     code = next((t.replace(" ", "") for t in texte(xml or "") if re.fullmatch(r"\d{3} \d{3}", t)), None)
     merke("Anmeldung: Quick-Connect-Code sichtbar", code is not None)
     merke("Anmeldung: QR-Code sichtbar", bool(xml) and "kinolel.quickconnect.qr" in xml)
+    # Lel 24.10.: „… aber auch mit Tippen möglich machen“ – Passwort-Weg gleichwertig daneben, Fokus im Benutzernamen
+    merke("Anmeldung: Benutzername/Passwort daneben", bool(xml) and any("Mit Benutzername und Passwort" in t for t in texte(xml)),
+          "Fokus: " + fokus(xml or ""))
     if not code or not PW:
         if not PW:
             log("Kein KINOLEL_TEST_PW (Secret fehlt) – Test endet nach dem Anmeldebildschirm.")
