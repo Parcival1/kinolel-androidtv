@@ -21,6 +21,10 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.flow.filterNotNull
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.Alignment
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.kinolel.KinoLelSeiteFragment
 import org.jellyfin.androidtv.auth.repository.SessionRepository
@@ -95,6 +99,12 @@ private fun MainToolbar(
 			.focusRestorer(focusRequester)
 			.focusGroup(),
 		start = {
+			// KinoLel (Lel 24.10.): Logo mit Schriftzug immer sichtbar, wie im Web
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.spacedBy(24.dp),
+			) {
+			Logo(modifier = Modifier.height(42.dp))
 			ToolbarButtons {
 				val userImagePainter = rememberAsyncImagePainter(userImage)
 				val userImageState by userImagePainter.state.collectAsState()
@@ -126,6 +136,7 @@ private fun MainToolbar(
 				NowPlayingComposable(
 					onFocusableChange = {},
 				)
+			}
 			}
 		},
 		center = {
@@ -165,15 +176,8 @@ private fun MainToolbar(
 						colors = if (activeButton == MainToolbarActiveButton.Wuensche) activeButtonColors else ButtonDefaults.colors(),
 						content = { Text(stringResource(R.string.kinolel_wuensche)) }
 					)
-					Button(
-						onClick = {
-							if (activeButton != MainToolbarActiveButton.Hilfe) {
-								navigationRepository.navigate(Destinations.kinolelSeite(KinoLelSeiteFragment.HILFE))
-							}
-						},
-						colors = if (activeButton == MainToolbarActiveButton.Hilfe) activeButtonColors else ButtonDefaults.colors(),
-						content = { Text(stringResource(R.string.kinolel_hilfe)) }
-					)
+					// „Hilfe“ gibt es am Fernseher nicht (Lel 24.10.: „kannst du dir am Fernseher sparen“) –
+					// Update-Suche von Hand: Einstellungen > Info
 				}
 			}
 		},

@@ -8,6 +8,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import org.jellyfin.androidtv.BuildConfig
 import org.jellyfin.androidtv.R
+import org.jellyfin.androidtv.kinolel.Aktualisierung
+import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
 import org.jellyfin.androidtv.ui.base.Icon
 import org.jellyfin.androidtv.ui.base.Text
 import org.jellyfin.androidtv.ui.base.list.ListButton
@@ -36,8 +40,9 @@ fun SettingsAboutScreen(launchedFromLogin: Boolean = false) {
 		}
 
 		item {
-			val heading = "Jellyfin app version"
-			val caption = "jellyfin-androidtv ${BuildConfig.VERSION_NAME} ${BuildConfig.BUILD_TYPE}"
+			// KinoLel: eigener Name; die Grundlage (Jellyfin) nennt die Lizenzseite
+			val heading = "KinoLel TV"
+			val caption = "${BuildConfig.VERSION_NAME} ${BuildConfig.BUILD_TYPE}"
 			ListButton(
 				leadingContent = { Icon(painterResource(R.drawable.ic_jellyfin), contentDescription = null) },
 				headingContent = { Text(heading) },
@@ -56,6 +61,18 @@ fun SettingsAboutScreen(launchedFromLogin: Boolean = false) {
 				captionContent = { Text(caption) },
 				onClick = copyAction(ClipData.newPlainText(heading, caption)),
 				modifier = Modifier.focusKey("device_model")
+			)
+		}
+
+		// KinoLel: Update-Suche von Hand (sonst bei jedem Start)
+		if (!launchedFromLogin) item {
+			val context = LocalContext.current
+			val bereich = rememberCoroutineScope()
+			ListButton(
+				leadingContent = { Icon(painterResource(R.drawable.ic_loop), contentDescription = null) },
+				headingContent = { Text(stringResource(R.string.kinolel_update_suchen)) },
+				onClick = { bereich.launch { Aktualisierung.pruefen(context, vonHand = true) } },
+				modifier = Modifier.focusKey("kinolel_update")
 			)
 		}
 

@@ -273,13 +273,15 @@ def main():
     merke("Startseite: Fokus erkennbar", bool(fokus(xml)), fokus(xml))
 
     # 3. Kopfleiste: Wünsche und Hilfe nur mit dem Steuerkreuz
-    for ziel, kennzeichen, name in (("Wünsche", "wuensche.kinolel.de", "03-wuensche"), ("Hilfe", "Hilfe auf kinolel.de", "04-hilfe")):
+    # (Hilfe gibt es am Fernseher nicht mehr – Lel 24.10.)
+    merke("Kopfleiste: Logo mit Schriftzug sichtbar, kein „Hilfe“", "KinoLel" in " ".join(texte(ui())) and "Hilfe" not in texte(ui()))
+    for ziel, kennzeichen, name in (("Wünsche", "wuensche.kinolel.de", "03-wuensche"),):
         gefunden = False
         for _ in range(8):  # nach oben in die Kopfleiste
-            if fokus() in ("Startseite", "Suche", "Wünsche", "Hilfe"):
+            if fokus() in ("Startseite", "Suche", "Wünsche"):
                 break
             taste("DPAD_UP")
-        reihe = ["Startseite", "Suche", "Wünsche", "Hilfe"]
+        reihe = ["Startseite", "Suche", "Wünsche"]
         for _ in range(8):  # seitwärts bis zum Ziel
             f = fokus()
             if f == ziel:
@@ -582,6 +584,31 @@ def main():
     bild("13-zurueck-startbildschirm")
     merke("Zurück auf der Startseite: Google-TV-Startbildschirm, App im Hintergrund",
           lebt and vorne is not None and PAKET not in vorne[0], (vorne[0] if vorne else "?")[:120])
+
+    # 14. Wieder öffnen wie vom Google-TV-Startbildschirm (Lel 24.10.: „… wieder geöffnet … nur noch der alte Hintergrund
+    #     und keine Inhalte“): nach Zurück, nach Home, nach Home + beendetem App-Prozess (Speichermangel), nach Pause
+    def vom_startbildschirm():
+        adb("shell", "monkey", "-p", PAKET, "-c", "android.intent.category.LEANBACK_LAUNCHER", "1")
+
+    def startseite_da(name):
+        xml = warte_auf(enthaelt("Als Nächstes", "Weiter ansehen", "Kürzlich"), 40, takt=3)
+        bild(name)
+        return xml is not None
+
+    vom_startbildschirm()
+    merke("Wieder öffnen nach Zurück: Startseite mit Inhalten", startseite_da("14a-wieder-nach-zurueck"))
+    taste("HOME", pause=4)
+    vom_startbildschirm()
+    merke("Wieder öffnen nach Home-Taste: Startseite mit Inhalten", startseite_da("14b-wieder-nach-home"))
+    taste("HOME", pause=4)
+    adb("shell", "am", "kill", PAKET)  # wie der Chromecast bei Speichermangel: Prozess im Hintergrund beendet
+    time.sleep(3)
+    log("Prozess im Hintergrund beendet: " + ("nein" if adb("shell", "pidof", PAKET).strip() else "ja"))
+    vom_startbildschirm()
+    merke("Wieder öffnen nach beendetem Prozess: Startseite mit Inhalten", startseite_da("14c-wieder-nach-prozessende"))
+    taste("HOME", pause=60)  # längere Pause
+    vom_startbildschirm()
+    merke("Wieder öffnen nach 60 s Pause: Startseite mit Inhalten", startseite_da("14d-wieder-nach-pause"))
 
 
 try:

@@ -1,10 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KinoLel: Logo (Leinwand + Play) statt Jellyfin-Logo in den Einstellungen (Name der Datei bleibt, damit der Code passt) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:tint="#FFFFFF"
-    android:viewportWidth="256"
-    android:viewportHeight="256">
-    <path
-        android:fillColor="@android:color/white"
-        android:pathData="m127.998,39.598c-23.398,0 -98.717,136.547 -87.232,159.608s163.108,22.794 174.467,0c11.359,-22.794 -63.838,-159.608 -87.232,-159.608zM128.009,74.617c15.329,0 64.6,89.634 57.157,104.581 -7.442,14.942 -106.782,15.109 -114.312,0s41.827,-104.581 57.157,-104.581zM127.998,107.341c-7.765,0 -32.763,45.317 -28.948,52.969s54.128,7.568 57.898,0 -21.183,-52.966 -28.948,-52.969z" />
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group
+        android:translateX="0.6"
+        android:translateY="5.16"
+        android:scaleX="0.03368"
+        android:scaleY="0.03368">
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M22,0H655A22,22 0 0 1 677,22V411A22,22 0 0 1 655,433H22A22,22 0 0 1 0,411V22A22,22 0 0 1 22,0ZM64,45H613A14,14 0 0 1 627,59V374A14,14 0 0 1 613,388H64A14,14 0 0 1 50,374V59A14,14 0 0 1 64,45ZM241,216A97,97 0 1 0 435,216A97,97 0 1 0 241,216ZM308,156L401,216L308,279Z" />
+    </group>
 </vector>
