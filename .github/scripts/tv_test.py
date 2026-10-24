@@ -335,8 +335,8 @@ def main():
 
     # 6. Tonspur wechseln über die Leiste (♪): Knopfreihe ansteuern, Liste öffnen, die andere Sprache wählen
     vorher = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("AudioStreamIndex")
-    taste("DPAD_UP", pause=1.5)   # Leiste einblenden (Fokus: Wiedergabeleiste)
-    for _ in range(4):            # von der Wiedergabeleiste hoch in die Knopfreihe
+    taste("DPAD_CENTER", pause=1.5)   # Leiste einblenden (OK; Fokus: Wiedergabeleiste)
+    for _ in range(4):                # von der Wiedergabeleiste hoch in die Knopfreihe
         f = fokus_roh()
         if f and "SeekBar" not in f:
             break
@@ -496,7 +496,8 @@ def main():
     app_stopp()
     einstellungen_schreiben({"apps_liste": "http://10.0.2.2:8765/apps.json", "neuigkeiten_gesehen": "99.0.0"})
     app_start()
-    xml = warte_auf(enthaelt("Update verfügbar"), 60)
+    time.sleep(4)  # nicht lesen, während der Dialog einblendet (uiautomator + Android 14: Absturz in der Bedienungshilfe)
+    xml = warte_auf(enthaelt("Update verfügbar"), 60, takt=3)
     bild("11-update-hinweis")
     merke("Update-Hinweis (Test-apps.json 9.9.9)", xml is not None and "9.9.9" in " ".join(texte(xml or "")),
           "Fokus: " + fokus(xml or ""))
@@ -507,7 +508,8 @@ def main():
     app_stopp()
     einstellungen_schreiben({"neuigkeiten_gesehen": "0.0.9", "spaeter_bis": int(time.time() * 1000) + 3600_000})
     app_start()
-    xml = warte_auf(enthaelt("Neu in KinoLel"), 60)
+    time.sleep(4)
+    xml = warte_auf(enthaelt("Neu in KinoLel"), 60, takt=3)
     bild("12-was-ist-neu")
     merke("„Was ist neu“ nach Update", xml is not None, "Fokus: " + fokus(xml or ""))
     taste("DPAD_CENTER", pause=2)
