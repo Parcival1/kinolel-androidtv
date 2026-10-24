@@ -404,8 +404,8 @@
     <string name="home_section_resume_book">Olvasás folytatása</string>
     <string name="lbl_shuffle_queue">Véletlenszerű lejátszás</string>
     <string name="login_quickconnect_step_3">3. Hagyd jóvá ezt a kódot:</string>
-    <string name="login_quickconnect_step_2">2. Olvasd be a jobb oldali QR-kódot – vagy nyisd meg: Beállítások → Quick Connect</string>
-    <string name="login_quickconnect_step_1">1. Nyisd meg a KinoLelt a telefonodon (alkalmazás vagy kinolel.de), és jelentkezz be</string>
+    <string name="login_quickconnect_step_2">2. Olvasd be a QR-kódot – vagy Beállítások → Quick Connect</string>
+    <string name="login_quickconnect_step_1">1. Nyisd meg a KinoLelt a telefonodon (app vagy kinolel.de)</string>
     <string name="login_other_options">További lehetőségek:</string>
     <string name="login_connect_to">Kapcsolódás a %1$s-hoz</string>
     <string name="input_password">Jelszó</string>

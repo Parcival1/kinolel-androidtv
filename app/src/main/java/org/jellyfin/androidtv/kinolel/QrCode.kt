@@ -70,7 +70,7 @@ fun KinoLelQuickConnectQr(code: String) {
 			.semantics { contentDescription = "kinolel.quickconnect.qr" },
 	) {
 		// so groß wie die Spalte erlaubt (Platz für die Zeile darunter lassen), höchstens 240 dp
-		val seite = minOf(maxWidth - 28.dp, maxHeight - 90.dp, 240.dp)
+		val seite = minOf(maxWidth - 28.dp, maxHeight - 64.dp, 240.dp)
 		androidx.compose.foundation.layout.Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
 			QrCode(text = Marke.quickConnectAdresse(code), groesse = seite)
 			androidx.compose.foundation.layout.Spacer(Modifier.size(10.dp))

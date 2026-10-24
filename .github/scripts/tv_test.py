@@ -226,6 +226,7 @@ def main():
     # Lel 24.10.: „… aber auch mit Tippen möglich machen“ – Passwort-Weg gleichwertig daneben, Fokus im Benutzernamen
     merke("Anmeldung: Benutzername/Passwort daneben", bool(xml) and any("Mit Benutzername und Passwort" in t for t in texte(xml)),
           "Fokus: " + fokus(xml or ""))
+    merke("Kein „Jellyfin“ in der Oberfläche (Anmeldung)", bool(xml) and not any("Jellyfin" in t for t in texte(xml)))
     if not code or not PW:
         if not PW:
             log("Kein KINOLEL_TEST_PW (Secret fehlt) – Test endet nach dem Anmeldebildschirm.")

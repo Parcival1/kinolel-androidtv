@@ -406,9 +406,9 @@
     <string name="action_connect">Verbinden</string>
     <string name="pref_refresh_rate_scale_on_device">Skalierung durch Gerät</string>
     <string name="pref_refresh_rate_scale_on_tv">Skalierung durch TV</string>
-    <string name="login_quickconnect_step_3">3. Bestätige diesen Code:</string>
-    <string name="login_quickconnect_step_2">2. Scanne den QR-Code rechts – oder öffne Einstellungen → Quick Connect</string>
-    <string name="login_quickconnect_step_1">1. Öffne KinoLel auf dem Handy (App oder kinolel.de) und melde dich an</string>
+    <string name="login_quickconnect_step_3">3. Diesen Code bestätigen:</string>
+    <string name="login_quickconnect_step_2">2. QR-Code scannen – oder Einstellungen → Quick Connect</string>
+    <string name="login_quickconnect_step_1">1. KinoLel am Handy öffnen (App oder kinolel.de)</string>
     <string name="login_other_options">Weitere Optionen:</string>
     <string name="login_connect_to">Verbinde mit %1$s</string>
     <string name="input_password">Passwort</string>

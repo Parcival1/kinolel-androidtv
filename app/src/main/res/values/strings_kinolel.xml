@@ -26,7 +26,7 @@
     <string name="kinolel_hilfe_qr">Help on kinolel.de</string>
     <string name="kinolel_keine_verbindung">KinoLel can\'t be reached right now. Please check the TV\'s internet connection – the app will try again shortly.</string>
     <string name="kinolel_erneut_versuchen">Try again</string>
-    <string name="kinolel_quickconnect_qr">Scan with your phone – the code is already filled in, you just need to confirm.</string>
+    <string name="kinolel_quickconnect_qr">Scan with your phone – the code is already filled in.</string>
     <string name="kinolel_anmelden_ohne_tippen">Without typing (Quick Connect)</string>
     <string name="kinolel_anmelden_mit_passwort">With username and password</string>
 </resources>

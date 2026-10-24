@@ -485,8 +485,8 @@
     <string name="input_password">Password</string>
     <string name="login_connect_to">Connecting to %1$s</string>
     <string name="login_other_options">Other options:</string>
-    <string name="login_quickconnect_step_1">1. Open KinoLel on your phone (app or kinolel.de) and sign in</string>
-    <string name="login_quickconnect_step_2">2. Scan the QR code on the right – or open Settings → Quick Connect</string>
+    <string name="login_quickconnect_step_1">1. Open KinoLel on your phone (app or kinolel.de)</string>
+    <string name="login_quickconnect_step_2">2. Scan the QR code – or Settings → Quick Connect</string>
     <string name="login_quickconnect_step_3">3. Confirm this code:</string>
     <string name="lbl_refresh_switching">Refresh rate switching</string>
     <string name="pref_refresh_rate_scale_on_tv">Scale on TV</string>
