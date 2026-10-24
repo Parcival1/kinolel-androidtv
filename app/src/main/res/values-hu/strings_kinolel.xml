@@ -29,4 +29,8 @@
     <string name="kinolel_quickconnect_qr">Olvasd be a telefonoddal</string>
     <string name="kinolel_anmelden_ohne_tippen">Gépelés nélkül (Quick Connect)</string>
     <string name="kinolel_anmelden_mit_passwort">Felhasználónévvel és jelszóval</string>
+    <!-- Kanäle auf dem Fernseher-Startbildschirm (Lel 24.10.) -->
+    <string name="kinolel_kanal_weiter">Megtekintés folytatása</string>
+    <string name="kinolel_kanal_naechstes">Következik</string>
+    <string name="kinolel_kanal_neu">Új a KinoLelen</string>
 </resources>

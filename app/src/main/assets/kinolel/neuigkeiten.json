@@ -1,31 +1,40 @@
 {
-  "versionen": [
-    {
-      "version": "0.1.1",
-      "de": [
-        "Wo du gerade bist, ist jetzt überall deutlich zu sehen – auch in der Leiste beim Abspielen und in den Listen für Tonspur und Untertitel.",
-        "Startet jemand von einem anderen Gerät aus einen Film auf dem Fernseher, stürzt die App nicht mehr ab."
-      ],
-      "hu": [
-        "Mostantól mindenhol jól látszik, hol vagy – lejátszás közben a sávban, valamint a hangsáv- és feliratlistákban is.",
-        "Ha valaki egy másik eszközről indít filmet a tévén, az alkalmazás már nem omlik össze."
-      ],
-      "en": [
-        "You can now clearly see where you are everywhere – including the bar while watching and the audio and subtitle lists.",
-        "The app no longer crashes when someone starts a movie on the TV from another device."
-      ]
-    },
-    {
-      "version": "0.1.0",
-      "de": [
-        "Erste Version von KinoLel für den Fernseher (Android TV / Google TV): alles mit der Fernbedienung, Anmeldung per Quick Connect und QR-Code, Wünsche und Hilfe als QR-Code."
-      ],
-      "hu": [
-        "A KinoLel első tévés változata (Android TV / Google TV): minden a távirányítóval, bejelentkezés Quick Connecttel és QR-kóddal, kívánságok és súgó QR-kóddal."
-      ],
-      "en": [
-        "First version of KinoLel for the TV (Android TV / Google TV): everything with the remote, sign-in with Quick Connect and QR code, wishes and help as QR codes."
-      ]
-    }
-  ]
+ "versionen": [
+  {
+   "version": "0.1.1",
+   "de": [
+    "Oben links steht jetzt das KinoLel-Logo mit Namen, und der Hintergrund ist überall im neuen dunklen KinoLel-Design.",
+    "Öffnest du KinoLel wieder (z. B. nach der Home-Taste), ist die Startseite gleich mit allen Reihen da – nicht mehr leer.",
+    "Wo du gerade bist, ist jetzt überall deutlich zu sehen – auch in der Leiste beim Abspielen und in den Listen für Tonspur und Untertitel.",
+    "Startet jemand von einem anderen Gerät aus einen Film auf dem Fernseher, stürzt die App nicht mehr ab.",
+    "Den Reiter „Hilfe“ gibt es am Fernseher nicht mehr. „Nach Updates suchen“ findest du unter Einstellungen → Über."
+   ],
+   "hu": [
+    "Bal fent mostantól a KinoLel logó és név látható, a háttér pedig mindenhol az új, sötét KinoLel-dizájn.",
+    "Ha újra megnyitod a KinoLelt (pl. a Home gomb után), a kezdőlap azonnal megjelenik az összes sorral – már nem üres.",
+    "Mostantól mindenhol jól látszik, hol vagy – lejátszás közben a sávban, valamint a hangsáv- és feliratlistákban is.",
+    "Ha valaki egy másik eszközről indít filmet a tévén, az alkalmazás már nem omlik össze.",
+    "A „Súgó” fül a tévén megszűnt. A „Frissítések keresése” a Beállítások → Rólunk alatt található."
+   ],
+   "en": [
+    "The KinoLel logo and name now appear at the top left, and the background uses the new dark KinoLel design everywhere.",
+    "When you reopen KinoLel (e.g. after pressing Home), the home screen shows all rows right away – no longer empty.",
+    "You can now clearly see where you are everywhere – including the bar while watching and the audio and subtitle lists.",
+    "The app no longer crashes when someone starts a movie on the TV from another device.",
+    "The “Help” tab is gone on the TV. “Check for updates” is now under Settings → About."
+   ]
+  },
+  {
+   "version": "0.1.0",
+   "de": [
+    "Erste Version von KinoLel für den Fernseher (Android TV / Google TV): alles mit der Fernbedienung, Anmeldung per Quick Connect und QR-Code, Wünsche und Hilfe als QR-Code."
+   ],
+   "hu": [
+    "A KinoLel első tévés változata (Android TV / Google TV): minden a távirányítóval, bejelentkezés Quick Connecttel és QR-kóddal, kívánságok és súgó QR-kóddal."
+   ],
+   "en": [
+    "First version of KinoLel for the TV (Android TV / Google TV): everything with the remote, sign-in with Quick Connect and QR code, wishes and help as QR codes."
+   ]
+  }
+ ]
 }

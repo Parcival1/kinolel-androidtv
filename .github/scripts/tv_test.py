@@ -609,6 +609,24 @@ def main():
     taste("HOME", pause=60)  # längere Pause
     vom_startbildschirm()
     merke("Wieder öffnen nach 60 s Pause: Startseite mit Inhalten", startseite_da("14d-wieder-nach-pause"))
+    # wie auf Lels Fotos: erst eine andere Seite (Wünsche), dann Home-Taste, dann wieder öffnen
+    for _ in range(8):
+        if fokus() in ("Startseite", "Suche", "Wünsche"):
+            break
+        taste("DPAD_UP")
+    for _ in range(4):
+        if fokus() == "Wünsche":
+            break
+        taste("DPAD_RIGHT")
+    taste("DPAD_CENTER", pause=2)
+    auf_wuensche = warte_auf(enthaelt("wuensche.kinolel.de"), 20) is not None
+    taste("HOME", pause=4)
+    vom_startbildschirm()
+    # wieder da: Startseite mit Reihen oder die Wünsche-Seite, nur nicht leer
+    da = warte_auf(enthaelt("Als Nächstes", "Weiter ansehen", "Kürzlich", "wuensche.kinolel.de"), 40, takt=3)
+    bild("14e-wieder-nach-wuensche")
+    merke("Wieder öffnen nach Wünsche + Home-Taste: Inhalte da", da is not None and auf_wuensche,
+          "" if auf_wuensche else "Wünsche-Seite nicht erreicht")
 
 
 try:
@@ -633,6 +651,10 @@ finally:
               if "AccessibilityNodeInfoDumper" not in z and " V WindowManager" not in z and " V ShellTransitions" not in z]
     with open(os.path.join(AUS, "logcat.txt"), "w", encoding="utf-8") as f:
         f.write("\n".join(zeilen)[-1500000:])
+    # Kanäle für den Fernseher-Startbildschirm (Lel 24.10.): „Weiter ansehen“, „Als Nächstes“, „Neu in KinoLel“
+    kanaele = [z for z in zeilen if "KinoLel-Kanäle:" in z]
+    merke("Startbildschirm-Kanäle Weiter ansehen / Als Nächstes / Neu in KinoLel angelegt",
+          bool(kanaele) and "alle angelegt" in kanaele[-1], (kanaele[-1].split("KinoLel-Kanäle:")[-1] if kanaele else "kein Lauf"))
     with open(os.path.join(AUS, "ergebnis.json"), "w", encoding="utf-8") as f:
         json.dump(ergebnis, f, ensure_ascii=False, indent=1)
     fehler = [k for k, v in ergebnis.items() if not v["ok"]]

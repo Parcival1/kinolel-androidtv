@@ -14,7 +14,7 @@
         <item name="android:colorAccent">@color/jellyfin_blue</item>
         <!-- Background resource or color -->
         <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="defaultBackground">@color/not_quite_black</item>
+        <item name="defaultBackground">@drawable/kinolel_hintergrund</item> <!-- KinoLel: Verlauf statt Volltonfarbe -->
         <!-- Background color for CardViews -->
         <item name="cardImageBackground">@color/grey</item>
         <item name="cardViewBackground">@android:color/transparent</item>

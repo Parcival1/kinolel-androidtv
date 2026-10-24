@@ -29,4 +29,8 @@
     <string name="kinolel_quickconnect_qr">Scan with your phone</string>
     <string name="kinolel_anmelden_ohne_tippen">Without typing (Quick Connect)</string>
     <string name="kinolel_anmelden_mit_passwort">With username and password</string>
+    <!-- Kanäle auf dem Fernseher-Startbildschirm (Lel 24.10.) -->
+    <string name="kinolel_kanal_weiter">Continue watching</string>
+    <string name="kinolel_kanal_naechstes">Next up</string>
+    <string name="kinolel_kanal_neu">New on KinoLel</string>
 </resources>

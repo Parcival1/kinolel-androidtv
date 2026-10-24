@@ -81,6 +81,10 @@ class BackgroundService(
 	 * Use splashscreen from [server] as background.
 	 */
 	fun setBackground(server: Server) {
+		// KinoLel (Lel 24.10.): nicht das Startbild aus dem Server-Branding (altes KinoLel-Design) zeigen,
+		// sondern den KinoLel-Hintergrund der App (Theme, Verlauf wie auf kinolel.de)
+		if (true) return clearBackgrounds()
+
 		// Check if item is set and backgrounds are enabled
 		if (userPreferences[UserPreferences.backdropBehavior] == BackdropBehavior.DISABLED)
 			return clearBackgrounds()

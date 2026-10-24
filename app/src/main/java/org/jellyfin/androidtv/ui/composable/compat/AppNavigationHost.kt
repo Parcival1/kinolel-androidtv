@@ -10,6 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.withStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.jellyfin.androidtv.ui.browsing.DestinationFragmentView
@@ -35,12 +37,18 @@ fun AppNavigationHost(
 		modifier = modifier,
 	)
 
+	val lifecycle = LocalLifecycleOwner.current.lifecycle
 	LaunchedEffect(Unit) {
 		navigationRepository.currentAction.collect { action ->
-			when (action) {
-				is NavigationAction.NavigateFragment -> factory.view.navigate(action)
-				NavigationAction.GoBack -> factory.view.goBack()
-				NavigationAction.Nothing -> Unit
+			// KinoLel (Lel 24.10.: nach dem Wiederöffnen „nur Hintergrund, keine Inhalte“): erst umschalten, wenn die
+			// Activity wieder sichtbar ist. Sonst baut sich die Startseite auf, während sie im Hintergrund gestoppt ist
+			// (Wiederöffnen über die StartupActivity setzt die Navigation zurück), und ihre Reihen fehlen danach.
+			lifecycle.withStarted {
+				when (action) {
+					is NavigationAction.NavigateFragment -> factory.view.navigate(action)
+					NavigationAction.GoBack -> factory.view.goBack()
+					NavigationAction.Nothing -> Unit
+				}
 			}
 		}
 	}

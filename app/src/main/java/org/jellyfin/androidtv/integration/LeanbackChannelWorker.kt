@@ -115,57 +115,43 @@ class LeanbackChannelWorker(
 			// Get next up episodes
 			val (resumeItems, nextUpItems) = getNextUpItems()
 			// Get latest media
-			val (latestEpisodes, latestMovies, latestMedia) = getLatestMedia()
-			val myMedia = getMyMedia()
+			val (_, _, latestMedia) = getLatestMedia()
 			// Delete current items from the channels
 			context.contentResolver.delete(TvContractCompat.PreviewPrograms.CONTENT_URI, null, null)
 
-			// Get channel URIs
-			val latestMediaChannel = getChannelUri(
-				"latest_media", Channel.Builder()
+			// KinoLel (Lel 24.10.): drei Kanäle wie die Startseite auf kinolel.de – „Weiter ansehen“, „Als Nächstes“,
+			// „Neu in KinoLel“ (Logo: KinoLel-Symbol). Für Startbildschirme mit App-Kanälen (z. B. Projectivy).
+			val resumeChannel = getChannelUri(
+				"kinolel_resume", Channel.Builder()
 					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
-					.setDisplayName(context.getString(R.string.home_section_latest_media))
-					.setAppLinkIntent(Intent(context, StartupActivity::class.java))
-					.build(),
-				default = true
-			)
-			val myMediaChannel = getChannelUri(
-				"my_media", Channel.Builder()
-					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
-					.setDisplayName(context.getString(R.string.lbl_my_media))
+					.setDisplayName(context.getString(R.string.kinolel_kanal_weiter))
 					.setAppLinkIntent(Intent(context, StartupActivity::class.java))
 					.build()
 			)
 			val nextUpChannel = getChannelUri(
 				"next_up", Channel.Builder()
 					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
-					.setDisplayName(context.getString(R.string.lbl_next_up))
+					.setDisplayName(context.getString(R.string.kinolel_kanal_naechstes))
 					.setAppLinkIntent(Intent(context, StartupActivity::class.java))
 					.build()
 			)
-			val latestMoviesChannel = getChannelUri(
-				"latest_movies", Channel.Builder()
+			val latestMediaChannel = getChannelUri(
+				"latest_media", Channel.Builder()
 					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
-					.setDisplayName(context.getString(R.string.lbl_movies))
+					.setDisplayName(context.getString(R.string.kinolel_kanal_neu))
 					.setAppLinkIntent(Intent(context, StartupActivity::class.java))
-					.build()
+					.build(),
+				default = true
 			)
-			val latestEpisodesChannel = getChannelUri(
-				"latest_episodes", Channel.Builder()
-					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
-					.setDisplayName(context.getString(R.string.lbl_new_episodes))
-					.setAppLinkIntent(Intent(context, StartupActivity::class.java))
-					.build()
-			)
+			// Kanäle aus v0.1.0 (Meine Medien, Filme, Neue Folgen) entfernen
+			alteKanaeleEntfernen("my_media", "latest_movies", "latest_episodes")
 			val preferParentThumb = userPreferences[UserPreferences.seriesThumbnailsEnabled]
 
 			// Add new items
 			arrayOf(
+				resumeItems to resumeChannel,
 				nextUpItems to nextUpChannel,
 				latestMedia to latestMediaChannel,
-				latestMovies to latestMoviesChannel,
-				latestEpisodes to latestEpisodesChannel,
-				myMedia to myMediaChannel,
 			).forEach { (items, channel) ->
 				if (channel == null) {
 					Timber.e("Skipping channel because it was not available")
@@ -185,6 +171,11 @@ class LeanbackChannelWorker(
 				}
 			}
 			updateWatchNext(resumeItems + nextUpItems)
+			Timber.i(
+				"KinoLel-Kanäle: Weiter ansehen %d, Als Nächstes %d, Neu %d (%s)",
+				resumeItems.size, nextUpItems.size, latestMedia.size,
+				if (resumeChannel != null && nextUpChannel != null && latestMediaChannel != null) "alle angelegt" else "FEHLT",
+			)
 
 			// Success!
 			Result.success()
@@ -212,6 +203,17 @@ class LeanbackChannelWorker(
 			.map(Uri::parse)
 			.forEach { uri -> context.contentResolver.delete(uri, null, null) }
 		store.edit { clear() }
+	}
+
+	/** KinoLel: nicht mehr verwendete Kanäle vom Startbildschirm nehmen. */
+	private fun alteKanaeleEntfernen(vararg namen: String) {
+		val store = context.getSharedPreferences(CHANNEL_STORE_NAME, Context.MODE_PRIVATE)
+		for (name in namen) {
+			val uri = store.getString(name, null)?.toUri() ?: continue
+			runCatching { context.contentResolver.delete(uri, null, null) }
+				.onFailure { Timber.w(it, "KinoLel: alter Kanal $name nicht entfernt") }
+			store.edit { remove(name) }
+		}
 	}
 
 	/**

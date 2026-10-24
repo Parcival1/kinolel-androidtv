@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KinoLel: Hintergrund wie das Lade-Overlay auf kinolel.de (Mitte etwas heller). Feste Größe, weil die App das Theme-
+     Bild als Bitmap zeichnet; klein gehalten (Speicher Chromecast HD), wird auf den Bildschirm gestreckt. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:type="radial"
+        android:centerX="0.5"
+        android:centerY="0.45"
+        android:gradientRadius="220dp"
+        android:startColor="#151B2A"
+        android:centerColor="#0B0F18"
+        android:endColor="#05070D" />
+    <size
+        android:width="320dp"
+        android:height="180dp" />
+</shape>
