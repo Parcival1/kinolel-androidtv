@@ -324,21 +324,30 @@ def main():
     for i in range(4):
         taste("DPAD_RIGHT", pause=0.4)
     bild("07b-spulen-vorschau")
-    taste("DPAD_CENTER", pause=4)
-    s = api.tv_sitzung() or {}
-    pos = (s.get("PlayState") or {}).get("PositionTicks", 0) / 1e7
+    taste("DPAD_CENTER", pause=2)
+    pos = 0
+    for _ in range(10):
+        pos = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("PositionTicks", 0) / 1e7
+        if pos > 60:
+            break
+        time.sleep(2)
     merke("Spulen mit dem Steuerkreuz (Position beim Server)", pos > 60, f"{pos:.0f} s")
 
     # 6. Tonspur wechseln über die Leiste (♪): Knopfreihe ansteuern, Liste öffnen, die andere Sprache wählen
     vorher = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("AudioStreamIndex")
-    taste("DPAD_UP", pause=1)
+    taste("DPAD_UP", pause=1.5)   # Leiste einblenden (Fokus: Wiedergabeleiste)
+    for _ in range(3):            # von der Wiedergabeleiste hoch in die Knopfreihe
+        if "SeekBar" not in fokus_roh():
+            break
+        taste("DPAD_UP", pause=1)
     bild("07c-knopfreihe-fokus")
     gewechselt = False
-    for _ in range(8):
+    for nr in range(8):
         xml = ui()
         f = fokus(xml) + " " + fokus_roh(xml)
         log("Player-Fokus: " + f[:160])
-        if re.search(r"Audio|Ton|Sprache", f, re.I):
+        # Knopfreihe: Abspielen, Zurück, Vor, Untertitel, Tonspur (ohne Beschriftung im Baum -> 5. Knopf)
+        if re.search(r"Audio|Ton|Sprache", f, re.I) or (nr == 4 and "SeekBar" not in f and not re.search(r"Audio|Ton", f)):
             taste("DPAD_CENTER", pause=2)
             bild("07d-tonspuren")
             optionen = [t for t in texte(ui()) if re.search(r"(?i)eng|englisch|deu|deutsch", t)]
@@ -348,14 +357,30 @@ def main():
                 if re.search(r"(?i)eng|englisch", fokus()):
                     break
                 taste("DPAD_DOWN", pause=0.8)
-            taste("DPAD_CENTER", pause=6)
+            taste("DPAD_CENTER", pause=4)
             gewechselt = True
             break
-        taste("DPAD_RIGHT", pause=0.8)
-    nachher = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("AudioStreamIndex")
+        if nr == 0:
+            # an den Anfang der Knopfreihe
+            for _ in range(6):
+                taste("DPAD_LEFT", pause=0.4)
+        else:
+            taste("DPAD_RIGHT", pause=0.8)
+    nachher = vorher
+    for _ in range(8):
+        nachher = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("AudioStreamIndex")
+        if nachher != vorher:
+            break
+        time.sleep(2)
     merke("Tonspur wechseln (Englisch)", gewechselt and nachher is not None and nachher != vorher, f"{vorher} -> {nachher}")
 
     # 7. Zurück: erst Leiste, dann Player – so oft, bis die Detailseite da ist (höchstens 5 Drücke)
+    # Jellyfin merkt sich eine Stelle erst ab 5 % der Laufzeit (Film 108 min) -> vorher auf 15 min springen
+    try:
+        api.befehl((api.tv_sitzung() or {})["Id"], "Playing/Seek?seekPositionTicks=9000000000")
+        time.sleep(12)
+    except Exception as e:  # noqa: BLE001
+        log(f"Sprung auf 15 min: {e}")
     zurueck = 0
     xml = None
     for zurueck in range(1, 6):
@@ -368,7 +393,7 @@ def main():
     time.sleep(3)
     daten = api.ruf("GET", f"/Items/{film['Id']}?userId={api.user}") or {}
     pos = (daten.get("UserData") or {}).get("PlaybackPositionTicks", 0) / 1e7
-    merke("Fortschritt beim Server gemeldet", pos > 20, f"{pos:.0f} s")
+    merke("Fortschritt beim Server gemeldet", pos > 600, f"{pos:.0f} s")
 
     # 8. Fernsteuerung vom Server (wie aus der Web-Oberfläche) – Sitzung vor jedem Befehl neu holen
     def befehl(pfad, daten=None):
@@ -420,8 +445,13 @@ def main():
             merke("Fernsteuerung: " + name, xml is not None and not any("Személyenként" in t for t in texte(xml)))
             taste("DPAD_CENTER", pause=1)
             continue
-        time.sleep(5)
-        merke("Fernsteuerung: " + name, pruef(), f"{(zustand().get('PositionTicks') or 0) / 1e7:.0f} s" if name == "Spulen" else "")
+        ok = False
+        for _ in range(10):
+            time.sleep(2)
+            if pruef():
+                ok = True
+                break
+        merke("Fernsteuerung: " + name, ok, f"{(zustand().get('PositionTicks') or 0) / 1e7:.0f} s" if name == "Spulen" else "")
 
     # 9. Nächste Folge: Folge kurz vor dem Ende starten -> Countdown „Als Nächstes“ -> nächste Folge läuft von selbst
     nu = (api.ruf("GET", f"/Shows/NextUp?userId={api.user}&limit=5") or {}).get("Items", [])
