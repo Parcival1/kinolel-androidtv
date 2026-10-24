@@ -106,6 +106,16 @@ def fokus(xml=None):
     return ""
 
 
+def fokus_roh(xml=None):
+    """Der fokussierte Knoten als Rohtext (Klasse, Kennung, Beschreibung) – zur Fehlersuche im Player."""
+    xml = xml if xml is not None else ui()
+    for k in KNOTEN.findall(xml):
+        if ' focused="true"' in k:
+            teile = [re.search(f' {a}="([^"]*)"', k) for a in ("class", "resource-id", "content-desc", "text")]
+            return " | ".join((m[1] if m else "") for m in teile)
+    return ""
+
+
 def warte_auf(bedingung, sekunden, takt=2.0):
     ende = time.time() + sekunden
     while time.time() < ende:
@@ -325,7 +335,9 @@ def main():
     bild("07c-knopfreihe-fokus")
     gewechselt = False
     for _ in range(8):
-        f = fokus()
+        xml = ui()
+        f = fokus(xml) + " " + fokus_roh(xml)
+        log("Player-Fokus: " + f[:160])
         if re.search(r"Audio|Ton|Sprache", f, re.I):
             taste("DPAD_CENTER", pause=2)
             bild("07d-tonspuren")

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KinoLel: Fokus in der Player-Leiste deutlich sichtbar (Leanback zeigt ihn sonst nur als kaum sichtbaren Ripple).
+     Überschreibt androidx.leanback drawable-v21/lb_control_button_secondary. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:constantSize="true">
+    <item android:state_focused="true">
+        <shape android:shape="oval">
+            <solid android:color="#E66C72EE" />
+            <stroke
+                android:width="3dp"
+                android:color="#9AA4FF" />
+            <size
+                android:width="@dimen/lb_control_button_secondary_diameter"
+                android:height="@dimen/lb_control_button_secondary_diameter" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#00000000" />
+            <size
+                android:width="@dimen/lb_control_button_secondary_diameter"
+                android:height="@dimen/lb_control_button_secondary_diameter" />
+        </shape>
+    </item>
+</selector>
