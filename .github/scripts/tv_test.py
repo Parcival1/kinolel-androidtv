@@ -372,11 +372,18 @@ def main():
 
     # 7. Zurück: erst Leiste, dann Player – so oft, bis die Detailseite da ist (höchstens 5 Drücke)
     # Jellyfin merkt sich eine Stelle erst ab 5 % der Laufzeit (Film 108 min) -> vorher auf 15 min springen
-    try:
-        api.befehl((api.tv_sitzung() or {})["Id"], "Playing/Seek?seekPositionTicks=9000000000")
-        time.sleep(12)
-    except Exception as e:  # noqa: BLE001
-        log(f"Sprung auf 15 min: {e}")
+    # nach dem Tonspurwechsel startet der Stream neu – erst danach springen (sonst verwirft der Player den Sprung)
+    time.sleep(8)
+    for versuch in range(3):
+        try:
+            api.befehl((api.tv_sitzung() or {})["Id"], "Playing/Seek?seekPositionTicks=9000000000")
+        except Exception as e:  # noqa: BLE001
+            log(f"Sprung auf 15 min: {e}")
+        time.sleep(10)
+        stelle = (((api.tv_sitzung() or {}).get("PlayState") or {}).get("PositionTicks") or 0) / 1e7
+        log(f"Sprung auf 15 min, Versuch {versuch + 1}: {stelle:.0f} s")
+        if stelle > 800:
+            break
     zurueck = 0
     xml = None
     for zurueck in range(1, 6):
