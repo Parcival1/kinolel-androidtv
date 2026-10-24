@@ -336,36 +336,32 @@ def main():
     # 6. Tonspur wechseln über die Leiste (♪): Knopfreihe ansteuern, Liste öffnen, die andere Sprache wählen
     vorher = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("AudioStreamIndex")
     taste("DPAD_UP", pause=1.5)   # Leiste einblenden (Fokus: Wiedergabeleiste)
-    for _ in range(3):            # von der Wiedergabeleiste hoch in die Knopfreihe
-        if "SeekBar" not in fokus_roh():
+    for _ in range(4):            # von der Wiedergabeleiste hoch in die Knopfreihe
+        f = fokus_roh()
+        if f and "SeekBar" not in f:
             break
-        taste("DPAD_UP", pause=1)
+        taste("DPAD_UP", pause=1.2)
+    log("Player-Fokus nach oben: " + fokus_roh()[:120])
     bild("07c-knopfreihe-fokus")
     gewechselt = False
-    for nr in range(8):
-        xml = ui()
-        f = fokus(xml) + " " + fokus_roh(xml)
-        log("Player-Fokus: " + f[:160])
-        # Knopfreihe: Abspielen, Zurück, Vor, Untertitel, Tonspur (ohne Beschriftung im Baum -> 5. Knopf)
-        if re.search(r"Audio|Ton|Sprache", f, re.I) or (nr == 4 and "SeekBar" not in f and not re.search(r"Audio|Ton", f)):
-            taste("DPAD_CENTER", pause=2)
-            bild("07d-tonspuren")
-            optionen = [t for t in texte(ui()) if re.search(r"(?i)eng|englisch|deu|deutsch", t)]
-            log("Tonspuren in der Liste: " + " | ".join(optionen[:6]))
-            # in der Liste nach unten zur englischen Spur und bestätigen
+    if "SeekBar" not in fokus_roh():
+        # Knopfreihe: Abspielen, Zurück, Vor, Untertitel, Tonspur -> ganz nach links, dann 4× rechts
+        for _ in range(6):
+            taste("DPAD_LEFT", pause=0.4)
+        for _ in range(4):
+            taste("DPAD_RIGHT", pause=0.6)
+        log("Player-Fokus Tonspur-Knopf: " + (fokus() + " " + fokus_roh())[:140])
+        taste("DPAD_CENTER", pause=2.5)
+        bild("07d-tonspuren")
+        optionen = [t for t in texte(ui()) if re.search(r"(?i)eng|englisch|deu|deutsch", t)]
+        log("Tonspuren in der Liste: " + " | ".join(optionen[:6]))
+        if optionen:
             for _ in range(6):
                 if re.search(r"(?i)eng|englisch", fokus()):
                     break
                 taste("DPAD_DOWN", pause=0.8)
             taste("DPAD_CENTER", pause=4)
             gewechselt = True
-            break
-        if nr == 0:
-            # an den Anfang der Knopfreihe
-            for _ in range(6):
-                taste("DPAD_LEFT", pause=0.4)
-        else:
-            taste("DPAD_RIGHT", pause=0.8)
     nachher = vorher
     for _ in range(8):
         nachher = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("AudioStreamIndex")
