@@ -10,7 +10,9 @@ alles nur mit der Fernbedienung (Steuerkreuz, OK, Zurück). Fester Server `https
   Bilder (Banner, Symbol, Logo): `marke/tv_bilder.py` (Pillow, KinoLel-Logo, Schrift Inter – Lizenz `marke/Inter-OFL.txt`).
 - **KinoLel-Zusätze** (`app/src/main/java/org/jellyfin/androidtv/kinolel/`):
   - Anmeldung mit Quick Connect: Code + QR-Code (öffnet am Handy kinolel.de mit eingetragenem Code)
-  - Kopfleiste mit „Wünsche“ und „Hilfe“ (QR-Codes)
+  - Kopfleiste mit KinoLel-Logo und „Wünsche“ (QR-Codes); „Nach Updates suchen“ unter Einstellungen → Über
+  - Hintergrund im KinoLel-Design (nie das Startbild aus dem Server-Branding)
+  - Kanäle auf dem Fernseher-Startbildschirm: „Weiter ansehen“, „Als Nächstes“, „Neu in KinoLel“
   - Dialoge im KinoLel-Stil
   - Update-Prüfung bei jedem Start über `https://kinolel.de/web/kinolel/apps.json` (Schlüssel `androidtv`)
   - „Was ist neu“ nach Updates (`app/src/main/assets/kinolel/neuigkeiten.json`)

@@ -23,18 +23,21 @@ import org.jellyfin.androidtv.ui.settings.routes
 
 @Composable
 fun StartupToolbar(
-	openHelp: () -> Unit
+	// KinoLel (Lel 24.10.: Hilfe „kannst du dir am Fernseher sparen“): ohne openHelp kein Hilfe-Knopf
+	openHelp: (() -> Unit)? = null,
 ) {
 	var settingsVisible by remember { mutableStateOf(false) }
 
 	Toolbar(
 		end = {
 			ToolbarButtons {
-				IconButton(onClick = openHelp) {
-					Icon(
-						imageVector = ImageVector.vectorResource(R.drawable.ic_help),
-						contentDescription = stringResource(R.string.help),
-					)
+				if (openHelp != null) {
+					IconButton(onClick = openHelp) {
+						Icon(
+							imageVector = ImageVector.vectorResource(R.drawable.ic_help),
+							contentDescription = stringResource(R.string.help),
+						)
+					}
 				}
 
 				IconButton(onClick = { settingsVisible = true }) {

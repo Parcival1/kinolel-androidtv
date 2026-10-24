@@ -32,5 +32,6 @@ KinoLel selbst (Hinweis „Update verfügbar“ → „Jetzt aktualisieren“).
 - Fokus immer sichtbar (Lavendel-Rahmen bzw. -Knopf).
 - Film abspielen, mit links/rechts spulen (Vorschaubilder), Ton/Untertitel in der Leiste (OK), Zurück schließt erst die
   Leiste, dann den Film. Lang OK drücken: Menü (gesehen, Favorit, zur Serie).
-- Kopfleiste: „Wünsche“ und „Hilfe“ zeigen QR-Codes.
+- Kopfleiste: KinoLel-Logo oben links, „Wünsche“ zeigt QR-Codes. Updates: Einstellungen → Über → „Nach Updates suchen“.
+- Home-Taste, später KinoLel wieder öffnen: Die Startseite ist mit allen Reihen da.
 - Profilbild oben links: anderes Konto (Familienfernseher).
