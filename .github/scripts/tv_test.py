@@ -308,82 +308,169 @@ def main():
     time.sleep(30)
     bild("06-wiedergabe-30s")
 
-    # 5. Spulen mit Vorschau (Trickplay): Leiste zeigen, nach rechts spulen, sofort fotografieren
+    # 5. Spulen mit Vorschau (Trickplay): Leiste zeigen (OK), mit rechts spulen (Vorschaubild), OK übernimmt die Stelle
     taste("DPAD_CENTER", pause=1.5)
     bild("07a-leiste")
     for i in range(4):
         taste("DPAD_RIGHT", pause=0.4)
     bild("07b-spulen-vorschau")
-    time.sleep(3)
+    taste("DPAD_CENTER", pause=4)
     s = api.tv_sitzung() or {}
     pos = (s.get("PlayState") or {}).get("PositionTicks", 0) / 1e7
-    merke("Spulen (Position beim Server)", pos > 35, f"{pos:.0f} s")
+    merke("Spulen mit dem Steuerkreuz (Position beim Server)", pos > 60, f"{pos:.0f} s")
 
-    # 6. Zurück: erst Leiste, dann Player
-    taste("BACK", pause=2)
-    taste("BACK", pause=4)
+    # 6. Tonspur wechseln über die Leiste (♪): Knopfreihe ansteuern, Liste öffnen, die andere Sprache wählen
+    vorher = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("AudioStreamIndex")
+    taste("DPAD_UP", pause=1)
+    bild("07c-knopfreihe-fokus")
+    gewechselt = False
+    for _ in range(8):
+        f = fokus()
+        if re.search(r"Audio|Ton|Sprache", f, re.I):
+            taste("DPAD_CENTER", pause=2)
+            bild("07d-tonspuren")
+            optionen = [t for t in texte(ui()) if re.search(r"(?i)eng|englisch|deu|deutsch", t)]
+            log("Tonspuren in der Liste: " + " | ".join(optionen[:6]))
+            # in der Liste nach unten zur englischen Spur und bestätigen
+            for _ in range(6):
+                if re.search(r"(?i)eng|englisch", fokus()):
+                    break
+                taste("DPAD_DOWN", pause=0.8)
+            taste("DPAD_CENTER", pause=6)
+            gewechselt = True
+            break
+        taste("DPAD_RIGHT", pause=0.8)
+    nachher = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("AudioStreamIndex")
+    merke("Tonspur wechseln (Englisch)", gewechselt and nachher is not None and nachher != vorher, f"{vorher} -> {nachher}")
+
+    # 7. Zurück: erst Leiste, dann Player – so oft, bis die Detailseite da ist (höchstens 5 Drücke)
+    zurueck = 0
+    xml = None
+    for zurueck in range(1, 6):
+        taste("BACK", pause=3)
+        xml = ui()
+        if any(TESTFILM in t for t in texte(xml)) and not (api.tv_sitzung() or {}).get("NowPlayingItem"):
+            break
     bild("08-zurueck")
-    xml = warte_auf(enthaelt(TESTFILM), 30)
-    merke("Zurück aus dem Player auf die Detailseite", xml is not None)
+    merke("Zurück aus dem Player auf die Detailseite", xml is not None and any(TESTFILM in t for t in texte(xml)), f"{zurueck}× Zurück")
+    time.sleep(3)
     daten = api.ruf("GET", f"/Items/{film['Id']}?userId={api.user}") or {}
     pos = (daten.get("UserData") or {}).get("PlaybackPositionTicks", 0) / 1e7
     merke("Fortschritt beim Server gemeldet", pos > 20, f"{pos:.0f} s")
 
-    # 7. Fernsteuerung vom Server (wie aus der Web-Oberfläche)
-    s = api.tv_sitzung()
-    if s:
-        sid = s["Id"]
-        api.befehl(sid, f"Playing?playCommand=PlayNow&itemIds={film['Id']}&startPositionTicks=600000000")
-        ok = False
-        for _ in range(20):
-            s2 = api.tv_sitzung() or {}
-            if (s2.get("NowPlayingItem") or {}).get("Id") == film["Id"]:
-                ok = True
-                break
-            time.sleep(2)
-        merke("Fernsteuerung: Abspielen", ok)
-        time.sleep(8)
-        api.befehl(sid, "Playing/Pause")
-        time.sleep(4)
-        merke("Fernsteuerung: Pause", ((api.tv_sitzung() or {}).get("PlayState") or {}).get("IsPaused") is True)
-        api.befehl(sid, "Message", {"Header": "KinoLel", "TimeoutMs": 12000,
-                                    "Text": "Pro Person ist nur eine Wiedergabe gleichzeitig möglich – bitte beende zuerst die andere. / "
-                                            "Személyenként egyszerre csak egy lejátszás lehetséges – előbb állítsd le a másikat."})
-        xml = warte_auf(enthaelt("Pro Person ist nur eine Wiedergabe"), 15, takt=1)
-        bild("09-nachricht-vom-server")
-        merke("Fernsteuerung: Nachricht (nur deutscher Teil)", xml is not None and not any("Személyenként" in t for t in texte(xml)))
-        taste("DPAD_CENTER", pause=1)
-        api.befehl(sid, "Playing/Unpause")
-        time.sleep(4)
-        merke("Fernsteuerung: Weiter", ((api.tv_sitzung() or {}).get("PlayState") or {}).get("IsPaused") is False)
-        api.befehl(sid, "Playing/Seek?seekPositionTicks=1200000000")
-        time.sleep(5)
-        pos = (((api.tv_sitzung() or {}).get("PlayState") or {}).get("PositionTicks") or 0) / 1e7
-        merke("Fernsteuerung: Spulen", 115 <= pos <= 140, f"{pos:.0f} s")
-        api.befehl(sid, "Playing/Stop")
-        time.sleep(5)
-        merke("Fernsteuerung: Stopp", not (api.tv_sitzung() or {}).get("NowPlayingItem"))
-    else:
-        merke("Fernsteuerung: Sitzung gefunden", False)
+    # 8. Fernsteuerung vom Server (wie aus der Web-Oberfläche) – Sitzung vor jedem Befehl neu holen
+    def befehl(pfad, daten=None):
+        s = api.tv_sitzung()
+        if not s:
+            raise RuntimeError("TV-Sitzung nicht gefunden")
+        try:
+            api.befehl(s["Id"], pfad, daten)
+        except urllib.error.HTTPError as e:
+            log(f"Befehl {pfad.split('?')[0]}: HTTP {e.code}")
+            raise
 
-    # 8. Update-Hinweis mit Test-apps.json (Version 9.9.9)
+    def zustand():
+        return (api.tv_sitzung() or {}).get("PlayState") or {}
+
+    for name, schritt in (
+        ("Abspielen", lambda: befehl(f"Playing?playCommand=PlayNow&itemIds={film['Id']}&startPositionTicks=600000000")),
+    ):
+        try:
+            schritt()
+        except Exception as e:  # noqa: BLE001
+            log(f"Fernsteuerung {name}: {e}")
+    ok = False
+    for _ in range(20):
+        if ((api.tv_sitzung() or {}).get("NowPlayingItem") or {}).get("Id") == film["Id"]:
+            ok = True
+            break
+        time.sleep(2)
+    merke("Fernsteuerung: Abspielen", ok)
+    time.sleep(8)
+    for name, pfad, daten, pruef in (
+        ("Pause", "Playing/Pause", None, lambda: zustand().get("IsPaused") is True),
+        ("Nachricht (nur deutscher Teil)", "Message", {"Header": "KinoLel", "TimeoutMs": 12000,
+            "Text": "Pro Person ist nur eine Wiedergabe gleichzeitig möglich – bitte beende zuerst die andere. / "
+                    "Személyenként egyszerre csak egy lejátszás lehetséges – előbb állítsd le a másikat."}, None),
+        ("Weiter", "Playing/Unpause", None, lambda: zustand().get("IsPaused") is False),
+        ("Spulen", "Playing/Seek?seekPositionTicks=1200000000", None,
+         lambda: 115 <= (zustand().get("PositionTicks") or 0) / 1e7 <= 140),
+        ("Stopp", "Playing/Stop", None, lambda: not (api.tv_sitzung() or {}).get("NowPlayingItem")),
+    ):
+        try:
+            befehl(pfad, daten)
+        except Exception as e:  # noqa: BLE001
+            merke("Fernsteuerung: " + name, False, str(e)[:120])
+            continue
+        if name.startswith("Nachricht"):
+            xml = warte_auf(enthaelt("Pro Person ist nur eine Wiedergabe"), 15, takt=1)
+            bild("09-nachricht-vom-server")
+            merke("Fernsteuerung: " + name, xml is not None and not any("Személyenként" in t for t in texte(xml)))
+            taste("DPAD_CENTER", pause=1)
+            continue
+        time.sleep(5)
+        merke("Fernsteuerung: " + name, pruef(), f"{(zustand().get('PositionTicks') or 0) / 1e7:.0f} s" if name == "Spulen" else "")
+
+    # 9. Nächste Folge: Folge kurz vor dem Ende starten -> Countdown „Als Nächstes“ -> nächste Folge läuft von selbst
+    nu = (api.ruf("GET", f"/Shows/NextUp?userId={api.user}&limit=5") or {}).get("Items", [])
+    folge = None
+    for kandidat in nu:
+        folgen = (api.ruf("GET", f"/Shows/{kandidat['SeriesId']}/Episodes?userId={api.user}&seasonId={kandidat.get('SeasonId', '')}") or {}).get("Items", [])
+        ids = [f["Id"] for f in folgen]
+        if kandidat["Id"] in ids and ids.index(kandidat["Id"]) < len(ids) - 1:
+            folge, naechste = kandidat, folgen[ids.index(kandidat["Id"]) + 1]
+            break
+    if folge:
+        laenge = (api.ruf("GET", f"/Items/{folge['Id']}?userId={api.user}") or {}).get("RunTimeTicks") or 0
+        try:
+            befehl(f"Playing?playCommand=PlayNow&itemIds={folge['Id']}&startPositionTicks={max(0, laenge - 450_000_000)}")
+        except Exception as e:  # noqa: BLE001
+            log(f"Nächste Folge starten: {e}")
+        weiter = None
+        ende = time.time() + 150
+        countdown_bild = False
+        while time.time() < ende:
+            if not countdown_bild and any(re.search(r"(?i)nächste|als nächstes|next", t) for t in texte(ui())):
+                bild("10a-naechste-folge-countdown")
+                countdown_bild = True
+            jetzt = ((api.tv_sitzung() or {}).get("NowPlayingItem") or {}).get("Id")
+            if jetzt == naechste["Id"]:
+                weiter = jetzt
+                break
+            time.sleep(3)
+        bild("10b-naechste-folge-laeuft")
+        merke("Nächste Folge startet von selbst (Countdown)", weiter is not None,
+              f"{folge.get('SeriesName')}: {folge.get('Name')} -> {naechste.get('Name')}")
+        try:
+            befehl("Playing/Stop")
+        except Exception:  # noqa: BLE001
+            pass
+        time.sleep(4)
+        for _ in range(3):  # zurück zur Startseite der App
+            if not (api.tv_sitzung() or {}).get("NowPlayingItem"):
+                break
+            taste("BACK", pause=2)
+    else:
+        merke("Nächste Folge: passende Folge gefunden", False, "keine Serie mit weiterer Folge in „Als Nächstes“")
+
+    # 10. Update-Hinweis mit Test-apps.json (Version 9.9.9)
     server = test_server({"androidtv": {"version": "9.9.9", "url": "http://10.0.2.2:8765/nicht-da.apk"}})
     app_stopp()
     einstellungen_schreiben({"apps_liste": "http://10.0.2.2:8765/apps.json", "neuigkeiten_gesehen": "99.0.0"})
     app_start()
     xml = warte_auf(enthaelt("Update verfügbar"), 60)
-    bild("10-update-hinweis")
+    bild("11-update-hinweis")
     merke("Update-Hinweis (Test-apps.json 9.9.9)", xml is not None and "9.9.9" in " ".join(texte(xml or "")),
           "Fokus: " + fokus(xml or ""))
     taste("BACK", pause=2)  # = Später
     server.shutdown()
 
-    # 9. „Was ist neu“ einmal nach einem Update (zuletzt gesehen: 0.0.9)
+    # 11. „Was ist neu“ einmal nach einem Update (zuletzt gesehen: 0.0.9)
     app_stopp()
     einstellungen_schreiben({"neuigkeiten_gesehen": "0.0.9", "spaeter_bis": int(time.time() * 1000) + 3600_000})
     app_start()
     xml = warte_auf(enthaelt("Neu in KinoLel"), 60)
-    bild("11-was-ist-neu")
+    bild("12-was-ist-neu")
     merke("„Was ist neu“ nach Update", xml is not None, "Fokus: " + fokus(xml or ""))
     taste("DPAD_CENTER", pause=2)
     app_stopp()
@@ -391,7 +478,7 @@ def main():
     time.sleep(8)
     merke("„Was ist neu“ nur einmal", not any("Neu in KinoLel" in t for t in texte(ui())))
 
-    # 10. Speicher (Ziel: Chromecast HD mit 1,5 GB stabil)
+    # 12. Speicher (Ziel: Chromecast HD mit 1,5 GB stabil)
     mem = adb("shell", "dumpsys", "meminfo", PAKET)
     gesamt = re.search(r"TOTAL PSS:\s*(\d+)", mem) or re.search(r"TOTAL\s+(\d+)", mem)
     mb = int(gesamt[1]) / 1024 if gesamt else 0
@@ -399,13 +486,13 @@ def main():
         f.write(mem)
     merke("Speicher (PSS)", 0 < mb < 400, f"{mb:.0f} MB")
 
-    # 11. Zurück auf der Startseite -> Google-TV-Startbildschirm, KinoLel bleibt im Hintergrund (Prozess lebt)
+    # 13. Zurück auf der Startseite -> Google-TV-Startbildschirm, KinoLel bleibt im Hintergrund (Prozess lebt)
     for _ in range(3):
         taste("BACK", pause=1.5)
     oben = adb("shell", "dumpsys", "activity", "activities")
     vorne = re.search(r"(?:mResumedActivity|topResumedActivity)[^\n]*", oben)
     lebt = bool(adb("shell", "pidof", PAKET).strip())
-    bild("12-zurueck-startbildschirm")
+    bild("13-zurueck-startbildschirm")
     merke("Zurück auf der Startseite: Google-TV-Startbildschirm, App im Hintergrund",
           lebt and vorne is not None and PAKET not in vorne[0], (vorne[0] if vorne else "?")[:120])
 
