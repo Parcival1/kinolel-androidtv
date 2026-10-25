@@ -249,22 +249,33 @@ def startvideo():
     """Öffnen im Bildschirmvideo: Startbild, bis die Reihen stehen – nie Kopfleiste ohne Reihen, nie Live-TV."""
     app_stopp()
     time.sleep(2)
-    adb("shell", "rm", "-f", "/sdcard/kl-start.mp4")
-    aufnahme = subprocess.Popen(["adb", "shell", "screenrecord", "--time-limit", "30", "--bit-rate", "8000000",
-                                 "/sdcard/kl-start.mp4"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(1.5)
-    adb("shell", "monkey", "-p", PAKET, "-c", "android.intent.category.LEANBACK_LAUNCHER", "1")
-    try:
-        aufnahme.wait(timeout=60)
-    except subprocess.TimeoutExpired:
-        aufnahme.kill()
-    time.sleep(2)
-    video = os.path.join(AUS, "15-oeffnen.mp4")
-    adb("pull", "/sdcard/kl-start.mp4", video, timeout=60)
+    adb("shell", "rm", "-f", "/sdcard/kl-start-*.mp4")
     rahmen = os.path.join(AUS, "oeffnen-rahmen")
     os.makedirs(rahmen, exist_ok=True)
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-i", video, "-vf", "fps=6", os.path.join(rahmen, "r%03d.png")],
-                   timeout=180)
+    # screenrecord hört auf dem Emulator nach ~10 s von selbst auf -> Abschnitte hintereinander, bis 30 s erfasst sind
+    teile = []
+
+    def aufnehmen():
+        beginn = time.time()
+        while time.time() - beginn < 30 and len(teile) < 6:
+            ziel = f"/sdcard/kl-start-{len(teile)}.mp4"
+            t0 = time.time()
+            subprocess.run(["adb", "shell", "screenrecord", "--time-limit", "30", "--bit-rate", "8000000", ziel],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
+            teile.append(ziel)
+            log(f"Startvideo Abschnitt {len(teile)}: {time.time() - t0:.1f} s aufgenommen")
+    rekorder = threading.Thread(target=aufnehmen)
+    rekorder.start()
+    time.sleep(1.5)
+    adb("shell", "monkey", "-p", PAKET, "-c", "android.intent.category.LEANBACK_LAUNCHER", "1")
+    rekorder.join(timeout=120)
+    bild("15b-nach-dem-oeffnen")
+    time.sleep(2)
+    for i, ziel in enumerate(teile):
+        video = os.path.join(AUS, f"15-oeffnen-{i}.mp4")
+        adb("pull", ziel, video, timeout=60)
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-i", video, "-vf", "fps=6", os.path.join(rahmen, f"t{i}-r%03d.png")],
+                       timeout=180)
     bilder = sorted(f for f in os.listdir(rahmen) if f.endswith(".png"))
     zeile = []
     for b in bilder:
