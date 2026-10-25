@@ -283,11 +283,30 @@ def startvideo():
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
             teile.append(ziel)
             log(f"Startvideo Abschnitt {len(teile)}: {time.time() - t0:.1f} s aufgenommen")
+    # screenrecord schreibt im Emulator manchmal nach ~9 s keine Bilder mehr, obwohl es weiterläuft -> nebenher
+    # Bildschirmfotos (etwa 1–2 je Sekunde) als zweite Spur
+    schnapp = []
+    stopp = threading.Event()
+
+    def knipsen():
+        beginn = time.time()
+        while not stopp.is_set() and time.time() - beginn < 25:
+            r = subprocess.run(["adb", "exec-out", "screencap", "-p"], capture_output=True, timeout=20)
+            if r.stdout:
+                datei = os.path.join(rahmen, f"s{len(schnapp):03d}.png")
+                with open(datei, "wb") as f:
+                    f.write(r.stdout)
+                schnapp.append((time.time() - beginn, datei))
+            time.sleep(0.2)
     rekorder = threading.Thread(target=aufnehmen)
     rekorder.start()
     time.sleep(1.5)
     adb("shell", "monkey", "-p", PAKET, "-c", "android.intent.category.LEANBACK_LAUNCHER", "1")
+    fotograf = threading.Thread(target=knipsen)
+    fotograf.start()
     rekorder.join(timeout=120)
+    stopp.set()
+    fotograf.join(timeout=30)
     bild("15b-nach-dem-oeffnen")
     time.sleep(2)
     for i, ziel in enumerate(teile):
@@ -295,27 +314,39 @@ def startvideo():
         adb("pull", ziel, video, timeout=60)
         subprocess.run(["ffmpeg", "-loglevel", "error", "-i", video, "-vf", "fps=6", os.path.join(rahmen, f"t{i}-r%03d.png")],
                        timeout=180)
-    bilder = sorted(f for f in os.listdir(rahmen) if f.endswith(".png"))
-    zeile = []
-    for b in bilder:
-        txt = subprocess.run(["tesseract", os.path.join(rahmen, b), "-", "-l", "deu", "--psm", "11"],
+    def einordnen(datei):
+        txt = subprocess.run(["tesseract", datei, "-", "-l", "deu", "--psm", "11"],
                              capture_output=True, text=True, timeout=60).stdout
         kopf = "Startseite" in txt or "Wünsche" in txt
         reihen = any(w in txt for w in ("Nächstes", "Weiter ansehen", "Kürzlich", "Meine Medien"))
         livetv = any(w in txt for w in ("Live-TV", "Läuft gerade", "Fernsehprogramm", "Fernsehaufnahmen"))
-        zeile.append("L" if livetv else ("H" if kopf and not reihen else ("F" if reihen else ".")))
-    verlauf = "".join(zeile)
+        return "L" if livetv else ("H" if kopf and not reihen else ("F" if reihen else "."))
+
+    bilder = sorted(f for f in os.listdir(rahmen) if f.startswith("t") and f.endswith(".png"))
+    verlauf = "".join(einordnen(os.path.join(rahmen, b)) for b in bilder)
+    fotos = "".join(einordnen(d) for _, d in schnapp)
     log(f"Öffnen, Bild für Bild (6/s; . Startbild, H halb aufgebaut, F fertig, L Live-TV): {verlauf}")
+    log(f"Öffnen, Bildschirmfotos ({len(schnapp)} in {schnapp[-1][0] if schnapp else 0:.0f} s): {fotos}")
     with open(os.path.join(AUS, "15-oeffnen-verlauf.txt"), "w", encoding="utf-8") as f:
-        f.write(verlauf + "\n")
+        f.write(verlauf + "\n" + fotos + "\n" + " ".join(f"{t:.1f}" for t, _ in schnapp) + "\n")
     halb = max((len(s) for s in re.findall(r"H+", verlauf)), default=0)
+    halb_fotos = max((len(s) for s in re.findall(r"H+", fotos)), default=0)
     erst_fertig = verlauf.find("F")
-    merke("Öffnen (Video): kein Live-TV-Abschnitt", bool(bilder) and "L" not in verlauf, f"{len(bilder)} Bilder")
-    # Überblendung (0,25 s) darf ein einzelnes Bild „halb“ zeigen, länger nicht
-    merke("Öffnen (Video): Startbild, bis die Reihen stehen (keine halb aufgebaute Startseite)",
-          erst_fertig >= 0 and halb <= 1,
-          f"fertig nach {erst_fertig / 6:.1f} s, längste halbe Phase {halb} Bild(er)" if erst_fertig >= 0 else "Startseite nicht erkannt")
-    for b in bilder:
+    foto_fertig = fotos.find("F")
+    merke("Öffnen (Video): kein Live-TV-Abschnitt", bool(bilder or schnapp) and "L" not in verlauf + fotos,
+          f"{len(bilder)} Bilder, {len(schnapp)} Fotos")
+    # Überblendung (0,25 s) darf ein einzelnes Bild „halb“ zeigen, länger nicht. Endet das Video vor der fertigen
+    # Startseite (screenrecord hängt), belegen die Bildschirmfotos den Rest.
+    if erst_fertig >= 0:
+        ok, info = halb <= 1 and halb_fotos <= 1, f"fertig nach {erst_fertig / 6:.1f} s, längste halbe Phase {halb} Bild(er), Fotos {halb_fotos}"
+    elif foto_fertig >= 0:
+        ok = halb <= 1 and halb_fotos <= 1
+        info = (f"Video endet vorher ({len(bilder) / 6:.1f} s), Fotos: fertig nach {schnapp[foto_fertig][0]:.1f} s, "
+                f"längste halbe Phase {halb_fotos} Foto(s)")
+    else:
+        ok, info = False, "Startseite nicht erkannt"
+    merke("Öffnen (Video): Startbild, bis die Reihen stehen (keine halb aufgebaute Startseite)", ok, info)
+    for b in os.listdir(rahmen):
         os.remove(os.path.join(rahmen, b))
     os.rmdir(rahmen)
 
@@ -816,6 +847,27 @@ def main():
     time.sleep(8)
     merke("„Was ist neu“ nur einmal", not any("Neu in KinoLel" in t for t in texte(ui())))
 
+    # 11b. Sprache wie in KinoLel gewählt (Lel 25.10.: „Sind Updatenachrichten auch auf Ungarisch … wenn die ausgewählte
+    #     Sprache auf Ungarisch ist?“): App auf Deutsch, im Konto „Magyar“ -> „Was ist neu“ auf Ungarisch.
+    #     Danach App wieder Deutsch, Konto-Eintrag entfernt (am Ende stellt finally den Ursprungszustand her).
+    sprache_konto("hu")
+    app_stopp()
+    einstellungen_schreiben({"neuigkeiten_gesehen": "0.0.9", "spaeter_bis": int(time.time() * 1000) + 3600_000})
+    app_start()
+    time.sleep(12)  # Sprache lesen, App-Sprache umstellen, Activity neu – währenddessen nicht lesen (Bedienungshilfe)
+    xml = warte_auf(enthaelt("Újdonságok", "Neu in KinoLel"), 60, takt=3)
+    bild("17-was-ist-neu-ungarisch")
+    titel = next((t for t in texte(xml or "") if "Újdonságok" in t or "Neu in KinoLel" in t), "nicht gezeigt")
+    gebiet = adb("shell", "cmd", "locale", "get-app-locales", PAKET).strip()
+    merke("„Was ist neu“ ungarisch (App auf Deutsch, im Konto Magyar)", "Újdonságok" in titel, f"{titel}; {gebiet[-40:]}")
+    if xml is not None:
+        taste("DPAD_CENTER", pause=2)
+    sprache_konto(None)
+    app_stopp()
+    adb("shell", "cmd", "locale", "set-app-locales", PAKET, "--locales", "de-DE")
+    app_start()  # weiter wie bisher: App läuft auf Deutsch mit Startseite
+    warte_auf(enthaelt("Als Nächstes", "Weiter ansehen", "Kürzlich", "Meine Medien"), 40, takt=3)
+
     # 12. Speicher (Ziel: Chromecast HD mit 1,5 GB stabil)
     mem = adb("shell", "dumpsys", "meminfo", PAKET)
     gesamt = re.search(r"TOTAL PSS:\s*(\d+)", mem) or re.search(r"TOTAL\s+(\d+)", mem)
@@ -903,24 +955,6 @@ def main():
     seiten = einstellungen_rundgang()
     merke("Einstellungen: Seiten mit der Fernbedienung geöffnet", len(seiten) >= 8, f"{len(seiten)} Seiten")
 
-    # 17. Sprache wie in KinoLel gewählt (Lel 25.10.: „Sind Updatenachrichten auch auf Ungarisch … wenn die ausgewählte
-    #     Sprache auf Ungarisch ist?“): App auf Deutsch, im Konto „Magyar“ -> „Was ist neu“ auf Ungarisch.
-    #     Danach App wieder Deutsch, Konto-Eintrag entfernt (am Ende stellt finally den Ursprungszustand her).
-    sprache_konto("hu")
-    app_stopp()
-    einstellungen_schreiben({"neuigkeiten_gesehen": "0.0.9", "spaeter_bis": int(time.time() * 1000) + 3600_000})
-    app_start()
-    time.sleep(12)  # Sprache lesen, App-Sprache umstellen, Activity neu – währenddessen nicht lesen (Bedienungshilfe)
-    xml = warte_auf(enthaelt("Újdonságok", "Neu in KinoLel"), 60, takt=3)
-    bild("17-was-ist-neu-ungarisch")
-    titel = next((t for t in texte(xml or "") if "Újdonságok" in t or "Neu in KinoLel" in t), "nicht gezeigt")
-    gebiet = adb("shell", "cmd", "locale", "get-app-locales", PAKET).strip()
-    merke("„Was ist neu“ ungarisch (App auf Deutsch, im Konto Magyar)", "Újdonságok" in titel, f"{titel}; {gebiet[-40:]}")
-    if xml is not None:
-        taste("DPAD_CENTER", pause=2)
-    sprache_konto(None)
-    app_stopp()
-    adb("shell", "cmd", "locale", "set-app-locales", PAKET, "--locales", "de-DE")
 
 
 try:
