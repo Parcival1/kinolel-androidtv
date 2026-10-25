@@ -250,12 +250,12 @@ def startvideo():
     app_stopp()
     time.sleep(2)
     adb("shell", "rm", "-f", "/sdcard/kl-start.mp4")
-    aufnahme = subprocess.Popen(["adb", "shell", "screenrecord", "--time-limit", "15", "--bit-rate", "8000000",
+    aufnahme = subprocess.Popen(["adb", "shell", "screenrecord", "--time-limit", "30", "--bit-rate", "8000000",
                                  "/sdcard/kl-start.mp4"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(1.5)
     adb("shell", "monkey", "-p", PAKET, "-c", "android.intent.category.LEANBACK_LAUNCHER", "1")
     try:
-        aufnahme.wait(timeout=40)
+        aufnahme.wait(timeout=60)
     except subprocess.TimeoutExpired:
         aufnahme.kill()
     time.sleep(2)

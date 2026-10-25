@@ -29,7 +29,7 @@ import org.jellyfin.androidtv.ui.background.AppThemeBackground
  * Notbremse: nach [NOTBREMSE_MS] verschwindet es trotzdem (z. B. Server langsam).
  */
 object KinoLelStartseite {
-	const val NOTBREMSE_MS = 12_000L
+	const val NOTBREMSE_MS = 20_000L
 	const val PRUEFTAKT_MS = 100L
 
 	private val _bereit = MutableStateFlow(false)
