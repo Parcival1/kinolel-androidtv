@@ -548,6 +548,14 @@ def main():
     # „Weiter ansehen“ gibt es nur, wenn das Konto etwas angefangen hat (Server fragen) – sonst zeigt Jellyfin die Zeile nicht
     angefangen = len((api.ruf("GET", f"/UserItems/Resume?userId={api.user}&limit=1&mediaTypes=Video") or {}).get("Items", []))
     erwartet = ["Weiter ansehen", "Als Nächstes"] if angefangen else ["Als Nächstes"]
+    # Auf dem Bildschirm stehen nur zwei Zeilen; mit „Weiter ansehen“ rutscht „Als Nächstes“ darunter -> blättern
+    runter = 0
+    while not all(w in zeilen for w in erwartet) and runter < 3:
+        taste("DPAD_DOWN", pause=1.5)
+        runter += 1
+        zeilen += [w for w in ("Weiter ansehen", "Als Nächstes") if w not in zeilen and any(w in t for t in texte(ui()))]
+    if runter:
+        taste("DPAD_UP", mal=runter, pause=1.0)
     merke("Startseite: Zeilen Weiter ansehen / Als Nächstes", all(w in zeilen for w in erwartet),
           ", ".join(zeilen) + ("" if angefangen else " (Konto hat nichts angefangen -> ohne „Weiter ansehen“)"))
     merke("Startseite: Fokus erkennbar", bool(fokus(xml)), fokus(xml))
