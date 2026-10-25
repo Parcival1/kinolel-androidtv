@@ -151,7 +151,7 @@ class LeanbackChannelWorker(
 			val myMediaChannel = getChannelUri(
 				"my_media", Channel.Builder()
 					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
-					.setDisplayName(context.getString(R.string.lbl_my_media))
+					.setDisplayName(context.inKinoLelSprache.getString(R.string.lbl_my_media))
 					.setAppLinkIntent(Intent(context, StartupActivity::class.java))
 					.build()
 			)
@@ -185,7 +185,7 @@ class LeanbackChannelWorker(
 			}
 			updateWatchNext(resumeItems + nextUpItems)
 			Timber.i(
-				"KinoLel-Kanäle: Weiter ansehen %d, Als Nächstes %d, Neu %d, Meine Medien %d (%s)",
+				"KinoLel-Kanäle: Weiter ansehen %d, Als Nächstes %d, Neu %d, Medienbibliotheken %d (%s)",
 				resumeItems.size, nextUpItems.size, latestMedia.size, myMedia.size,
 				if (resumeChannel != null && nextUpChannel != null && latestMediaChannel != null && myMediaChannel != null) "alle angelegt" else "FEHLT",
 			)

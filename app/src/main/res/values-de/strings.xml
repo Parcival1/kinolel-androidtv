@@ -217,7 +217,7 @@
     <string name="lbl_new_only">Nur Neues</string>
     <string name="lbl_news">Neuigkeiten</string>
     <string name="lbl_repeat_episodes">Folgen wiederholen</string>
-    <string name="lbl_my_media">Meine Medien</string>
+    <string name="lbl_my_media">Medienbibliotheken</string>
     <string name="pref_about_title">Über</string>
     <string name="watch_now">Jetzt anschauen</string>
     <string name="pref_next_up_timeout_title">\'Als nächstes\' Timerdauer</string>

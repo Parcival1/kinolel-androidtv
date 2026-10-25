@@ -1,6 +1,21 @@
 {
  "versionen": [
   {
+   "version": "1.1",
+   "de": [
+    "Auf der Startseite und im Kanal heißt „Meine Medien“ jetzt „Medienbibliotheken“ – wie auf kinolel.de.",
+    "Außerdem Fehlerbehebungen und Verbesserungen."
+   ],
+   "hu": [
+    "A kezdőképernyőn és a csatornán a „Saját média” neve mostantól „Médiakönyvtárak” – ahogy a kinolel.de oldalon is.",
+    "Emellett hibajavítások és fejlesztések."
+   ],
+   "en": [
+    "On the home screen and in the channel, “My media” is now called “Media libraries” – just like on kinolel.de.",
+    "Also bug fixes and improvements."
+   ]
+  },
+  {
    "version": "1.0",
    "de": [
     "Deine Medienbibliotheken sind wieder als Kanal auf der Google-TV-Startseite.",

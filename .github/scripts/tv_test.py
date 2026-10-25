@@ -318,7 +318,7 @@ def startvideo():
         txt = subprocess.run(["tesseract", datei, "-", "-l", "deu", "--psm", "11"],
                              capture_output=True, text=True, timeout=60).stdout
         kopf = "Startseite" in txt or "Wünsche" in txt
-        reihen = any(w in txt for w in ("Nächstes", "Weiter ansehen", "Kürzlich", "Meine Medien"))
+        reihen = any(w in txt for w in ("Nächstes", "Weiter ansehen", "Kürzlich", "Medienbibliotheken"))
         livetv = any(w in txt for w in ("Live-TV", "Läuft gerade", "Fernsehprogramm", "Fernsehaufnahmen"))
         return "L" if livetv else ("H" if kopf and not reihen else ("F" if reihen else "."))
 
@@ -539,12 +539,12 @@ def main():
         return
 
     # 2. Startseite
-    xml = warte_auf(enthaelt("Weiter ansehen", "Als Nächstes", "Kürzlich", "Meine Medien"), 120)
+    xml = warte_auf(enthaelt("Weiter ansehen", "Als Nächstes", "Kürzlich", "Medienbibliotheken"), 120)
     time.sleep(4)
     bild("02-startseite")
     xml = ui()
     zeilen = [w for w in ("Weiter ansehen", "Als Nächstes") if any(w in t for t in texte(xml))]
-    merke("Startseite geladen", xml is not None and any("Kürzlich" in t or "Meine Medien" in t or "Weiter" in t for t in texte(xml)))
+    merke("Startseite geladen", xml is not None and any("Kürzlich" in t or "Medienbibliotheken" in t or "Weiter" in t for t in texte(xml)))
     # „Weiter ansehen“ gibt es nur, wenn das Konto etwas angefangen hat (Server fragen) – sonst zeigt Jellyfin die Zeile nicht
     angefangen = len((api.ruf("GET", f"/UserItems/Resume?userId={api.user}&limit=1&mediaTypes=Video") or {}).get("Items", []))
     erwartet = ["Weiter ansehen", "Als Nächstes"] if angefangen else ["Als Nächstes"]
@@ -874,7 +874,7 @@ def main():
     app_stopp()
     adb("shell", "cmd", "locale", "set-app-locales", PAKET, "--locales", "de-DE")
     app_start()  # weiter wie bisher: App läuft auf Deutsch mit Startseite
-    warte_auf(enthaelt("Als Nächstes", "Weiter ansehen", "Kürzlich", "Meine Medien"), 40, takt=3)
+    warte_auf(enthaelt("Als Nächstes", "Weiter ansehen", "Kürzlich", "Medienbibliotheken"), 40, takt=3)
 
     # 12. Speicher (Ziel: Chromecast HD mit 1,5 GB stabil)
     mem = adb("shell", "dumpsys", "meminfo", PAKET)
@@ -955,7 +955,7 @@ def main():
     # 15. Öffnen im Bildschirmvideo (Lel 25.10.: „… sieht man kurz für eine halbe Sekunde irgendwelche komischen
     #     Menüelemente … Der Ladescreen muss also noch verlängert werden.“)
     startvideo()
-    xml = warte_auf(enthaelt("Als Nächstes", "Weiter ansehen", "Kürzlich", "Meine Medien"), 40, takt=3)
+    xml = warte_auf(enthaelt("Als Nächstes", "Weiter ansehen", "Kürzlich", "Medienbibliotheken"), 40, takt=3)
     merke("Startseite ohne Live-TV-Abschnitt (Server ohne Sender)", xml is not None
           and not any(w in t for t in texte(xml) for w in ("Live-TV", "Läuft gerade")))
 
@@ -994,7 +994,7 @@ finally:
         f.write("\n".join(zeilen)[-1500000:])
     # Kanäle für den Fernseher-Startbildschirm (Lel 24.10.): „Weiter ansehen“, „Als Nächstes“, „Neu in KinoLel“
     kanaele = [z for z in zeilen if "KinoLel-Kanäle:" in z]
-    merke("Startbildschirm-Kanäle Weiter ansehen / Als Nächstes / Neu in KinoLel / Meine Medien angelegt",
+    merke("Startbildschirm-Kanäle Weiter ansehen / Als Nächstes / Neu in KinoLel / Medienbibliotheken angelegt",
           bool(kanaele) and "alle angelegt" in kanaele[-1], (kanaele[-1].split("KinoLel-Kanäle:")[-1] if kanaele else "kein Lauf"))
     with open(os.path.join(AUS, "ergebnis.json"), "w", encoding="utf-8") as f:
         json.dump(ergebnis, f, ensure_ascii=False, indent=1)

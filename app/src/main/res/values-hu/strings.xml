@@ -127,7 +127,7 @@
     <string name="pref_about_title">Rólunk</string>
     <string name="pref_theme_emerald">Klasszikus smaragd</string>
     <string name="pref_theme_dark">Sötét (alapértelmezett)</string>
-    <string name="lbl_my_media">Saját média</string>
+    <string name="lbl_my_media">Médiakönyvtárak</string>
     <string name="lbl_image_size">Képméret</string>
     <string name="lbl_image_type">Képtípus</string>
     <string name="lbl_start_favorites">Tegye előre a kedvenceket</string>

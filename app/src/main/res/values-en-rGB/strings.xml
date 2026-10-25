@@ -219,7 +219,7 @@
     <string name="video_error_unknown_error">Failed to load video</string>
     <string name="lbl_just_this_once">Just this once</string>
     <string name="pref_about_title">About</string>
-    <string name="lbl_my_media">My media</string>
+    <string name="lbl_my_media">Media libraries</string>
     <string name="watch_now">Watch now</string>
     <string name="pref_next_up_timeout_title">Next up timer duration</string>
     <string name="pref_next_up_timeout_summary">How long to wait before playing the next item</string>
