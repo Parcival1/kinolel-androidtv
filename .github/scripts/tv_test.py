@@ -15,6 +15,7 @@ Passwort und Zugangsschlüssel werden nie ausgegeben. Ergebnis: tvtest/ablauf.tx
 """
 import http.server
 import json
+import xml.etree.ElementTree as ET
 import os
 import re
 import subprocess
@@ -68,9 +69,21 @@ def bild(name):
         f.write(adb("exec-out", "screencap", "-p", binaer=True))
 
 
+# Lel 25.10.: „… in den Einstellungen steht irgendwo immer noch ‚Jellyfin‘“ – jede gelesene Oberfläche prüfen
+# (außer den Lizenzen: dort stehen die technischen Namen der Grundlage zu Recht)
+JELLYFIN_FUNDE = {}
+JELLYFIN_ERLAUBT = [False]
+SEITE = ["?"]
+
+
 def ui():
     xml = adb("exec-out", "uiautomator", "dump", "/dev/tty", timeout=30)
-    return xml[: xml.rfind(">") + 1] if ">" in xml else ""
+    xml = xml[: xml.rfind(">") + 1] if ">" in xml else ""
+    if not JELLYFIN_ERLAUBT[0]:
+        for t in texte(xml):
+            if "jellyfin" in t.lower():
+                JELLYFIN_FUNDE.setdefault(t[:100], SEITE[0])
+    return xml
 
 
 KNOTEN = re.compile(r"<node [^>]*>")
@@ -199,6 +212,168 @@ class Api:
 api = Api()
 
 
+# --- Startseite wie bei Lel, Startvideo, Einstellungs-Rundgang (Lel 25.10.) ----------------------------------------
+LEL_ABSCHNITTE = ["smalllibrarytiles", "resume", "resumeaudio", "resumebook", "livetv", "nextup", "latestmedia",
+                  "none", "none", "none"]
+ANZEIGE_ORIGINAL = [None]
+
+
+def anzeige_pfad():
+    return f"/DisplayPreferences/usersettings?userId={api.user}&client=emby"
+
+
+def startseite_wie_lel():
+    """Lels Konto „TV“ hat die Startseiten-Abschnitte der Weboberfläche inkl. Live-TV – damit blitzten beim Öffnen
+    Live-TV-Knöpfe auf. Fürs Testkonto vorübergehend genauso setzen (am Ende zurück)."""
+    try:
+        d = api.ruf("GET", anzeige_pfad())
+        ANZEIGE_ORIGINAL[0] = json.loads(json.dumps(d))
+        d["CustomPrefs"] = {**(d.get("CustomPrefs") or {}), **{f"homesection{i}": w for i, w in enumerate(LEL_ABSCHNITTE)}}
+        api.ruf("POST", anzeige_pfad(), d)
+        log("Startseiten-Abschnitte des Testkontos wie bei Lel (mit Live-TV)")
+    except Exception as e:  # noqa: BLE001
+        log(f"Startseiten-Abschnitte nicht gesetzt: {e}")
+
+
+def startseite_zurueck():
+    if ANZEIGE_ORIGINAL[0] is not None:
+        try:
+            api.ruf("POST", anzeige_pfad(), ANZEIGE_ORIGINAL[0])
+            log("Startseiten-Abschnitte des Testkontos zurückgesetzt")
+        except Exception as e:  # noqa: BLE001
+            log(f"Startseiten-Abschnitte nicht zurückgesetzt: {e}")
+
+
+def startvideo():
+    """Öffnen im Bildschirmvideo: Startbild, bis die Reihen stehen – nie Kopfleiste ohne Reihen, nie Live-TV."""
+    app_stopp()
+    time.sleep(2)
+    adb("shell", "rm", "-f", "/sdcard/kl-start.mp4")
+    aufnahme = subprocess.Popen(["adb", "shell", "screenrecord", "--time-limit", "15", "--bit-rate", "8000000",
+                                 "/sdcard/kl-start.mp4"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(1.5)
+    adb("shell", "monkey", "-p", PAKET, "-c", "android.intent.category.LEANBACK_LAUNCHER", "1")
+    try:
+        aufnahme.wait(timeout=40)
+    except subprocess.TimeoutExpired:
+        aufnahme.kill()
+    time.sleep(2)
+    video = os.path.join(AUS, "15-oeffnen.mp4")
+    adb("pull", "/sdcard/kl-start.mp4", video, timeout=60)
+    rahmen = os.path.join(AUS, "oeffnen-rahmen")
+    os.makedirs(rahmen, exist_ok=True)
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-i", video, "-vf", "fps=6", os.path.join(rahmen, "r%03d.png")],
+                   timeout=180)
+    bilder = sorted(f for f in os.listdir(rahmen) if f.endswith(".png"))
+    zeile = []
+    for b in bilder:
+        txt = subprocess.run(["tesseract", os.path.join(rahmen, b), "-", "-l", "deu", "--psm", "11"],
+                             capture_output=True, text=True, timeout=60).stdout
+        kopf = "Startseite" in txt or "Wünsche" in txt
+        reihen = any(w in txt for w in ("Nächstes", "Weiter ansehen", "Kürzlich", "Meine Medien"))
+        livetv = any(w in txt for w in ("Live-TV", "Läuft gerade", "Fernsehprogramm", "Fernsehaufnahmen"))
+        zeile.append("L" if livetv else ("H" if kopf and not reihen else ("F" if reihen else ".")))
+    verlauf = "".join(zeile)
+    log(f"Öffnen, Bild für Bild (6/s; . Startbild, H halb aufgebaut, F fertig, L Live-TV): {verlauf}")
+    with open(os.path.join(AUS, "15-oeffnen-verlauf.txt"), "w", encoding="utf-8") as f:
+        f.write(verlauf + "\n")
+    halb = max((len(s) for s in re.findall(r"H+", verlauf)), default=0)
+    erst_fertig = verlauf.find("F")
+    merke("Öffnen (Video): kein Live-TV-Abschnitt", bool(bilder) and "L" not in verlauf, f"{len(bilder)} Bilder")
+    # Überblendung (0,25 s) darf ein einzelnes Bild „halb“ zeigen, länger nicht
+    merke("Öffnen (Video): Startbild, bis die Reihen stehen (keine halb aufgebaute Startseite)",
+          erst_fertig >= 0 and halb <= 1,
+          f"fertig nach {erst_fertig / 6:.1f} s, längste halbe Phase {halb} Bild(er)" if erst_fertig >= 0 else "Startseite nicht erkannt")
+    for b in bilder:
+        os.remove(os.path.join(rahmen, b))
+    os.rmdir(rahmen)
+
+
+# Einträge, die etwas auslösen statt eine Seite zu öffnen: nie drücken
+VERBOTEN = re.compile(r"(?i)abmeld|sign ?out|kijelentkez|entfern|remove|eltávolít|lösch|delete|törl|hinzufüg|hozzáad|"
+                      r"\badd\b|update|frissít|leeren|clear|ürít|neu ?start|restart|zurücksetz|reset|visszaállít|"
+                      r"teilen|share|megoszt|senden|send|küld|wechseln|"
+                      r"switch|vált|beenden|kilép")
+LIZENZ = re.compile(r"(?i)lizenz|licen")
+
+
+def fokus_eintrag(xml):
+    """(Beschriftung, umschaltbar) des fokussierten Eintrags, Beschriftung aus allen Texten darunter"""
+    try:
+        wurzel = ET.fromstring(xml)
+    except ET.ParseError:
+        return None
+    for n in wurzel.iter("node"):
+        if n.get("focused") == "true":
+            teile = [k.get("text") or k.get("content-desc") for k in n.iter("node") if (k.get("text") or k.get("content-desc"))]
+            return " / ".join(teile)[:90], any(k.get("checkable") == "true" for k in n.iter("node"))
+    return None
+
+
+def signatur(xml):
+    return tuple(t for t in texte(xml))[:40]
+
+
+def einstellungen_rundgang():
+    """Alle Einstellungsseiten mit dem Steuerkreuz öffnen (Umschalter und Auslöser nicht drücken) – jede gelesene
+    Oberfläche läuft durch den „Jellyfin“-Sammler in ui()."""
+    for _ in range(8):
+        if fokus() in ("Startseite", "Suche", "Wünsche"):
+            break
+        taste("DPAD_UP")
+    for _ in range(8):
+        if fokus() in ("Einstellungen", "Settings"):
+            break
+        taste("DPAD_RIGHT")
+    taste("DPAD_CENTER", pause=2)
+    seiten = []
+
+    def seite(tiefe, pfad):
+        SEITE[0] = " > ".join(pfad) or "Einstellungen"
+        xml = ui()
+        seiten.append(SEITE[0])
+        gesehen = []
+        eintrag = fokus_eintrag(xml)
+        while eintrag and eintrag[0] not in gesehen and len(gesehen) < 30:
+            gesehen.append(eintrag[0])
+            name, umschaltbar = eintrag
+            if tiefe < 3 and not umschaltbar and not VERBOTEN.search(name):
+                lizenz = bool(LIZENZ.search(name))
+                vorher = signatur(xml)
+                JELLYFIN_ERLAUBT[0] = lizenz
+                taste("DPAD_CENTER", pause=1.5)
+                neu = ui()
+                if signatur(neu) != vorher:
+                    if not lizenz:
+                        seite(tiefe + 1, pfad + [name.split(" / ")[0]])
+                    else:
+                        seiten.append(" > ".join(pfad + [name.split(" / ")[0]]) + " (Lizenzen, nicht geprüft)")
+                    taste("BACK", pause=1.2)
+                    # Fokus zurück auf denselben Eintrag
+                    for _ in range(30):
+                        e = fokus_eintrag(ui())
+                        if not e or e[0] == name:
+                            break
+                        taste("DPAD_DOWN", pause=0.4)
+                JELLYFIN_ERLAUBT[0] = False
+                SEITE[0] = " > ".join(pfad) or "Einstellungen"
+            taste("DPAD_DOWN", pause=0.5)
+            xml = ui()
+            eintrag = fokus_eintrag(xml)
+
+    try:
+        seite(0, [])
+    finally:
+        JELLYFIN_ERLAUBT[0] = False
+        for _ in range(6):  # Einstellungen schließen
+            if any(w in texte(ui()) for w in ("Startseite", "Wünsche")):
+                break
+            taste("BACK", pause=1)
+    with open(os.path.join(AUS, "16-einstellungen-seiten.txt"), "w", encoding="utf-8") as f:
+        f.write("\n".join(seiten) + "\n")
+    return seiten
+
+
 # --- Test-Server für die Update-Prüfung (der Emulator erreicht den Runner unter 10.0.2.2) ------------------------
 
 def test_server(apps_json):
@@ -261,6 +436,7 @@ def main():
         return
 
     api.anmelden()
+    startseite_wie_lel()
     try:
         api.ruf("POST", f"/QuickConnect/Authorize?code={code}&userId={api.user}")
         merke("Anmeldung: Code am „Handy“ bestätigt", True)
@@ -638,6 +814,17 @@ def main():
     merke("Wieder öffnen nach Wünsche + Home-Taste: Inhalte da", da is not None and auf_wuensche,
           "" if auf_wuensche else "Wünsche-Seite nicht erreicht")
 
+    # 15. Öffnen im Bildschirmvideo (Lel 25.10.: „… sieht man kurz für eine halbe Sekunde irgendwelche komischen
+    #     Menüelemente … Der Ladescreen muss also noch verlängert werden.“)
+    startvideo()
+    xml = warte_auf(enthaelt("Als Nächstes", "Weiter ansehen", "Kürzlich", "Meine Medien"), 40, takt=3)
+    merke("Startseite ohne Live-TV-Abschnitt (Server ohne Sender)", xml is not None
+          and not any(w in t for t in texte(xml) for w in ("Live-TV", "Läuft gerade")))
+
+    # 16. Alle Einstellungsseiten öffnen (Lel 25.10.: „… in den Einstellungen steht irgendwo immer noch ‚Jellyfin‘“)
+    seiten = einstellungen_rundgang()
+    merke("Einstellungen: Seiten mit der Fernbedienung geöffnet", len(seiten) >= 8, f"{len(seiten)} Seiten")
+
 
 try:
     main()
@@ -653,7 +840,10 @@ finally:
             log("TV-Sitzung abgemeldet")
     except Exception as e:
         log(f"TV-Abmeldung: {e}")
+    merke("Kein „Jellyfin“ auf allen geprüften Seiten (ohne Lizenzen)", not JELLYFIN_FUNDE,
+          "; ".join(f"{k} ({v})" for k, v in JELLYFIN_FUNDE.items())[:400])
     if api.token:
+        startseite_zurueck()
         api.abmelden()
         log("Hilfssitzung abgemeldet")
     # ohne die Masse an uiautomator-/Fenster-Zeilen, damit der ganze Lauf hineinpasst

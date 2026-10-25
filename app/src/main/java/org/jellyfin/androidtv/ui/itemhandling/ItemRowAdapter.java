@@ -105,6 +105,11 @@ public class ItemRowAdapter extends MutableObjectAdapter<Object> {
     private final Lazy<UserViewsRepository> userViewsRepository = inject(UserViewsRepository.class);
     private Context context;
 
+    /** KinoLel: Startbild bleibt, bis die Reihen der Startseite geladen sind. */
+    public boolean kinolelLaedtNoch() {
+        return isCurrentlyRetrieving();
+    }
+
     private boolean isCurrentlyRetrieving() {
         synchronized (currentlyRetrievingSemaphore) {
             return currentlyRetrieving;

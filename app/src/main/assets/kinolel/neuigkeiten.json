@@ -1,6 +1,21 @@
 {
  "versionen": [
   {
+   "version": "0.1.3",
+   "de": [
+    "Beim Öffnen bleibt das KinoLel-Startbild, bis die Startseite fertig ist – keine halb aufgebauten Menüs mehr.",
+    "Der leere Bereich „Live-TV“ erscheint nicht mehr, wenn es keine Sender gibt."
+   ],
+   "hu": [
+    "Megnyitáskor a KinoLel indítóképe addig látszik, amíg a kezdőlap el nem készül – nincsenek többé félkész menük.",
+    "Az üres „Élő TV” rész már nem jelenik meg, ha nincsenek csatornák."
+   ],
+   "en": [
+    "When opening, the KinoLel start screen stays until the home screen is ready – no more half-built menus.",
+    "The empty “Live TV” section no longer appears when there are no channels."
+   ]
+  },
+  {
    "version": "0.1.2",
    "de": [
     "Anmelden per QR-Code: Mit der Handy-Kamera gescannt, öffnet sich jetzt direkt die KinoLel-App (Android) mit eingetragenem Code – nur noch „Autorisieren“ tippen. Ohne App öffnet sich der Browser.",

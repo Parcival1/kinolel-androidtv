@@ -122,6 +122,11 @@ jobs:
       - name: QR-Leser für den Test (QR-Code der Anmeldung prüfen)
         run: pip3 install --quiet zxing-cpp pillow
 
+      - name: Video- und Texterkennung für den Test (Öffnen Bild für Bild prüfen)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends ffmpeg tesseract-ocr tesseract-ocr-deu >/dev/null
+
       - name: Android-TV-Emulator (API 34, 1080p) – Test nur mit Tastendrücken
         env:
           KINOLEL_TEST_PW: ${{ secrets.KINOLEL_TEST_PW }}
@@ -152,4 +157,4 @@ jobs:
         with:
           name: tvtest
           path: tvtest/
-          retention-days: 7
+          retention-days: 3

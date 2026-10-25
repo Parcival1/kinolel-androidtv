@@ -1,5 +1,8 @@
 package org.jellyfin.androidtv.ui.home
 
+import org.jellyfin.sdk.api.client.extensions.liveTvApi
+import org.jellyfin.androidtv.kinolel.KinoLelStartseite
+import android.os.SystemClock
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
@@ -83,6 +86,14 @@ class HomeRowsFragment : RowsSupportFragment(), AudioEventListener, View.OnKeyLi
 	private var currentRow: ListRow? = null
 	private var justLoaded = true
 
+	// KinoLel: alle Reihen der Startseite angelegt (danach wartet das Startbild nur noch auf deren Abfragen)
+	@Volatile
+	private var kinolelReihenAngelegt = false
+
+	private suspend fun kinolelLiveTvSender(): Boolean = runCatching {
+		api.liveTvApi.getLiveTvChannels(limit = 1, enableTotalRecordCount = true).content.totalRecordCount > 0
+	}.onFailure { Timber.w(it, "KinoLel: Live-TV-Sender nicht abfragbar") }.getOrDefault(false)
+
 	// Special rows
 	private val notificationsRow by lazy { NotificationsHomeFragmentRow(lifecycleScope, notificationsRepository) }
 	private val nowPlaying by lazy { HomeFragmentNowPlayingRow(lifecycleScope, playbackManager, mediaManager) }
@@ -91,6 +102,23 @@ class HomeRowsFragment : RowsSupportFragment(), AudioEventListener, View.OnKeyLi
 		super.onCreate(savedInstanceState)
 
 		adapter = MutableObjectAdapter<Row>(PositionableListRowPresenter())
+
+		// KinoLel: Startbild bleibt, bis alle Reihen ihre erste Abfrage hinter sich haben (oder Notbremse)
+		KinoLelStartseite.laedt()
+		lifecycleScope.launch {
+			val ende = SystemClock.elapsedRealtime() + KinoLelStartseite.NOTBREMSE_MS
+			while (SystemClock.elapsedRealtime() < ende) {
+				val reihen = adapter as MutableObjectAdapter<Row>
+				val laedt = (0 until reihen.size()).any { i ->
+					((reihen.get(i) as? ListRow)?.adapter as? ItemRowAdapter)?.kinolelLaedtNoch() == true
+				}
+				if (kinolelReihenAngelegt && !laedt) break
+				delay(KinoLelStartseite.PRUEFTAKT_MS)
+			}
+			if (SystemClock.elapsedRealtime() >= ende) Timber.w("KinoLel: Startseite nach Notbremse gezeigt")
+			delay(KinoLelStartseite.PRUEFTAKT_MS) // eine Runde fürs Zeichnen der fertigen Reihen
+			KinoLelStartseite.fertig()
+		}
 
 		lifecycleScope.launch(Dispatchers.IO) {
 			val currentUser = withTimeout(30.seconds) {
@@ -116,7 +144,9 @@ class HomeRowsFragment : RowsSupportFragment(), AudioEventListener, View.OnKeyLi
 				HomeSectionType.RESUME_BOOK -> Unit // Books are not (yet) supported
 				HomeSectionType.ACTIVE_RECORDINGS -> rows.add(helper.loadLatestLiveTvRecordings())
 				HomeSectionType.NEXT_UP -> rows.add(helper.loadNextUp())
-				HomeSectionType.LIVE_TV -> if (currentUser.policy?.enableLiveTvAccess == true) {
+				// KinoLel: Live-TV nur, wenn es Sender gibt – sonst blitzten die Live-TV-Knöpfe und eine leere Zeile
+				// „Läuft gerade“ beim Öffnen kurz auf (Lel 25.10.)
+				HomeSectionType.LIVE_TV -> if (currentUser.policy?.enableLiveTvAccess == true && kinolelLiveTvSender()) {
 					rows.add(HomeFragmentLiveTVRow(requireActivity(), userRepository))
 					rows.add(helper.loadOnNow())
 				}
@@ -132,6 +162,8 @@ class HomeRowsFragment : RowsSupportFragment(), AudioEventListener, View.OnKeyLi
 				notificationsRow.addToRowsAdapter(requireContext(), cardPresenter, adapter as MutableObjectAdapter<Row>)
 				nowPlaying.addToRowsAdapter(requireContext(), cardPresenter, adapter as MutableObjectAdapter<Row>)
 				for (row in rows) row.addToRowsAdapter(requireContext(), cardPresenter, adapter as MutableObjectAdapter<Row>)
+
+				kinolelReihenAngelegt = true
 
 				// Wire up Live TV sibling rows so the On Now row removes the buttons row when empty
 				@Suppress("UNCHECKED_CAST")

@@ -32,7 +32,7 @@ import org.jellyfin.androidtv.data.service.BackgroundService
 import org.koin.compose.koinInject
 
 @Composable
-private fun AppThemeBackground() {
+fun AppThemeBackground() {
 	val context = LocalContext.current
 	val themeBackground = remember(context.theme) {
 		val attributes = context.theme.obtainStyledAttributes(intArrayOf(R.attr.defaultBackground))
