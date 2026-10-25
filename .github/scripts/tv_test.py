@@ -73,6 +73,7 @@ def bild(name):
 # (außer den Lizenzen: dort stehen die technischen Namen der Grundlage zu Recht)
 JELLYFIN_FUNDE = {}
 JELLYFIN_ERLAUBT = [False]
+LIZENZ_JELLYFIN = set()  # nur zur Info: „Jellyfin“ in den Lizenzen (Namen der Grundlage, bleiben)
 SEITE = ["?"]
 
 
@@ -365,6 +366,7 @@ def einstellungen_rundgang():
                     if not lizenz:
                         seite(tiefe + 1, pfad + [name.split(" / ")[0]])
                     else:
+                        LIZENZ_JELLYFIN.update(x[:80] for x in texte(neu) if "jellyfin" in x.lower())
                         seiten.append(" > ".join(pfad + [name.split(" / ")[0]]) + " (Lizenzen, nicht geprüft)")
                     taste("BACK", pause=1.2)
                     # Fokus zurück auf denselben Eintrag
@@ -861,6 +863,8 @@ finally:
             log("TV-Sitzung abgemeldet")
     except Exception as e:
         log(f"TV-Abmeldung: {e}")
+    if LIZENZ_JELLYFIN:
+        log("Info – „Jellyfin“ in den Lizenzen (bleibt, Namen der Grundlage): " + "; ".join(sorted(LIZENZ_JELLYFIN))[:600])
     merke("Kein „Jellyfin“ auf allen geprüften Seiten (ohne Lizenzen)", not JELLYFIN_FUNDE,
           "; ".join(f"{k} ({v})" for k, v in JELLYFIN_FUNDE.items())[:400])
     if api.token:
