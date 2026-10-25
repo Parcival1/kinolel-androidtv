@@ -119,8 +119,8 @@ class LeanbackChannelWorker(
 			// Delete current items from the channels
 			context.contentResolver.delete(TvContractCompat.PreviewPrograms.CONTENT_URI, null, null)
 
-			// KinoLel (Lel 24.10.): drei Kanäle wie die Startseite auf kinolel.de – „Weiter ansehen“, „Als Nächstes“,
-			// „Neu in KinoLel“ (Logo: KinoLel-Symbol). Für Startbildschirme mit App-Kanälen (z. B. Projectivy).
+			// KinoLel (Lel 24./25.10.): Kanäle wie die Startseite auf kinolel.de – „Weiter ansehen“, „Als Nächstes“,
+			// „Neu in KinoLel“, „Meine Medien“ (Logo: KinoLel-Symbol). Für Startbildschirme mit App-Kanälen (z. B. Projectivy).
 			val resumeChannel = getChannelUri(
 				"kinolel_resume", Channel.Builder()
 					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
@@ -143,8 +143,19 @@ class LeanbackChannelWorker(
 					.build(),
 				default = true
 			)
-			// Kanäle aus v0.1.0 (Meine Medien, Filme, Neue Folgen) entfernen
-			alteKanaeleEntfernen("my_media", "latest_movies", "latest_episodes")
+			// KinoLel (Lel 25.10.: „… die Option meine Medienbibliotheken nicht mehr finden“): Bibliotheken-Kanal wieder da.
+			// Öffnen aus dem Kanal bei KinoLel im Hintergrund stürzte in v0.1.0 ab (Navigation bei gestoppter Activity) –
+			// behoben seit v0.1.2, Test 14f stellt es nach.
+			val myMedia = getMyMedia()
+			val myMediaChannel = getChannelUri(
+				"my_media", Channel.Builder()
+					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
+					.setDisplayName(context.getString(R.string.lbl_my_media))
+					.setAppLinkIntent(Intent(context, StartupActivity::class.java))
+					.build()
+			)
+			// Kanäle aus v0.1.0 (Filme, Neue Folgen) entfernen
+			alteKanaeleEntfernen("latest_movies", "latest_episodes")
 			val preferParentThumb = userPreferences[UserPreferences.seriesThumbnailsEnabled]
 
 			// Add new items
@@ -152,6 +163,7 @@ class LeanbackChannelWorker(
 				resumeItems to resumeChannel,
 				nextUpItems to nextUpChannel,
 				latestMedia to latestMediaChannel,
+				myMedia to myMediaChannel,
 			).forEach { (items, channel) ->
 				if (channel == null) {
 					Timber.e("Skipping channel because it was not available")
@@ -172,9 +184,9 @@ class LeanbackChannelWorker(
 			}
 			updateWatchNext(resumeItems + nextUpItems)
 			Timber.i(
-				"KinoLel-Kanäle: Weiter ansehen %d, Als Nächstes %d, Neu %d (%s)",
-				resumeItems.size, nextUpItems.size, latestMedia.size,
-				if (resumeChannel != null && nextUpChannel != null && latestMediaChannel != null) "alle angelegt" else "FEHLT",
+				"KinoLel-Kanäle: Weiter ansehen %d, Als Nächstes %d, Neu %d, Meine Medien %d (%s)",
+				resumeItems.size, nextUpItems.size, latestMedia.size, myMedia.size,
+				if (resumeChannel != null && nextUpChannel != null && latestMediaChannel != null && myMediaChannel != null) "alle angelegt" else "FEHLT",
 			)
 
 			// Success!

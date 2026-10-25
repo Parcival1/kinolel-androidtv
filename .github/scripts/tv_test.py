@@ -914,7 +914,7 @@ finally:
         f.write("\n".join(zeilen)[-1500000:])
     # Kanäle für den Fernseher-Startbildschirm (Lel 24.10.): „Weiter ansehen“, „Als Nächstes“, „Neu in KinoLel“
     kanaele = [z for z in zeilen if "KinoLel-Kanäle:" in z]
-    merke("Startbildschirm-Kanäle Weiter ansehen / Als Nächstes / Neu in KinoLel angelegt",
+    merke("Startbildschirm-Kanäle Weiter ansehen / Als Nächstes / Neu in KinoLel / Meine Medien angelegt",
           bool(kanaele) and "alle angelegt" in kanaele[-1], (kanaele[-1].split("KinoLel-Kanäle:")[-1] if kanaele else "kein Lauf"))
     with open(os.path.join(AUS, "ergebnis.json"), "w", encoding="utf-8") as f:
         json.dump(ergebnis, f, ensure_ascii=False, indent=1)

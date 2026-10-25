@@ -1,6 +1,18 @@
 {
  "versionen": [
   {
+   "version": "0.1.4",
+   "de": [
+    "Der Kanal „Meine Medien“ mit deinen Bibliotheken ist zurück. Falls er am Startbildschirm fehlt: Einstellungen → Kanäle → KinoLel → „Meine Medien“ einschalten."
+   ],
+   "hu": [
+    "Visszatért a „Saját média” csatorna a médiatáraiddal. Ha nem látszik a kezdőképernyőn: Beállítások → Csatornák → KinoLel → kapcsold be a „Saját média” csatornát."
+   ],
+   "en": [
+    "The “My media” channel with your libraries is back. If it is missing on the home screen: Settings → Channels → KinoLel → turn on “My media”."
+   ]
+  },
+  {
    "version": "0.1.3",
    "de": [
     "Beim Öffnen bleibt das KinoLel-Startbild, bis die Startseite fertig ist – keine halb aufgebauten Menüs mehr.",
