@@ -343,7 +343,8 @@ def einstellungen_rundgang():
     def im_panel(e):
         return e is not None and e[2] >= PANEL_LINKS
 
-    def seite(tiefe, pfad):
+    def seite(tiefe, pfad, vorfahren=()):
+        """True, wenn diese Seite sich durch eine Auswahl selbst geschlossen hat (dann kein Zurück beim Aufrufer)"""
         SEITE[0] = " > ".join(pfad) or "Einstellungen"
         xml = ui()
         seiten.append(SEITE[0])
@@ -362,13 +363,19 @@ def einstellungen_rundgang():
                 JELLYFIN_ERLAUBT[0] = lizenz
                 taste("DPAD_CENTER", pause=1.5)
                 neu = ui()
+                if signatur(neu) in vorfahren:
+                    # die Auswahl hat diese Seite geschlossen (eine Ebene höher gelandet)
+                    JELLYFIN_ERLAUBT[0] = False
+                    return True
                 if signatur(neu) != vorher:
+                    selbst_zu = False
                     if not lizenz:
-                        seite(tiefe + 1, pfad + [name.split(" / ")[0]])
+                        selbst_zu = seite(tiefe + 1, pfad + [name.split(" / ")[0]], tuple(vorfahren) + (vorher,))
                     else:
                         LIZENZ_JELLYFIN.update(x[:80] for x in texte(neu) if "jellyfin" in x.lower())
                         seiten.append(" > ".join(pfad + [name.split(" / ")[0]]) + " (Lizenzen, nicht geprüft)")
-                    taste("BACK", pause=1.2)
+                    if not selbst_zu:
+                        taste("BACK", pause=1.2)
                     # Fokus zurück auf denselben Eintrag
                     for _ in range(30):
                         e = fokus_eintrag(ui())
@@ -380,6 +387,7 @@ def einstellungen_rundgang():
             taste("DPAD_DOWN", pause=0.5)
             xml = ui()
             eintrag = fokus_eintrag(xml)
+        return False
 
     try:
         if im_panel(fokus_eintrag(ui())):
@@ -463,6 +471,8 @@ def main():
     try:
         api.ruf("POST", f"/QuickConnect/Authorize?code={code}&userId={api.user}")
         merke("Anmeldung: Code am „Handy“ bestätigt", True)
+        # Übergang Anmeldung -> Startseite nicht per uiautomator lesen (Android 14: NPE in der Bedienungshilfe, 25.10.)
+        time.sleep(8)
     except urllib.error.HTTPError as e:
         merke("Anmeldung: Code am „Handy“ bestätigt", False, f"HTTP {e.code}")
         return
@@ -836,6 +846,21 @@ def main():
     bild("14e-wieder-nach-wuensche")
     merke("Wieder öffnen nach Wünsche + Home-Taste: Inhalte da", da is not None and auf_wuensche,
           "" if auf_wuensche else "Wünsche-Seite nicht erreicht")
+
+    # 14f. Lels Absturz 24.10. (v0.1.0): Bibliothek aus einem Google-TV-Kanal („Meine Medien“) öffnen, während KinoLel im
+    #      Hintergrund liegt – die Seite wurde ohne ihre Argumente aufgebaut (NullPointerException)
+    ansichten = (api.ruf("GET", f"/UserViews?userId={api.user}") or {}).get("Items", [])
+    bib = next((v for v in ansichten if v.get("CollectionType") == "movies"), ansichten[0] if ansichten else None)
+    if bib:
+        taste("HOME", pause=3)
+        pid_vorher = adb("shell", "pidof", PAKET).strip()
+        app_start(("--es", "ItemId", bib["Id"], "--ez", "ItemIsUserView", "true"))
+        xml = warte_auf(enthaelt(bib.get("Name", "Filme")), 30, takt=3)
+        time.sleep(3)
+        bild("14f-bibliothek-aus-kanal")
+        merke("Bibliothek aus einem Google-TV-Kanal öffnen (App im Hintergrund, Lels Absturz 24.10.)",
+              xml is not None and adb("shell", "pidof", PAKET).strip() == pid_vorher, bib.get("Name", ""))
+        taste("BACK", pause=2)
 
     # 15. Öffnen im Bildschirmvideo (Lel 25.10.: „… sieht man kurz für eine halbe Sekunde irgendwelche komischen
     #     Menüelemente … Der Ladescreen muss also noch verlängert werden.“)

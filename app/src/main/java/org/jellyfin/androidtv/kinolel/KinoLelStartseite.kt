@@ -15,8 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -51,9 +49,7 @@ fun KinoLelLadebild() {
 	val bereit by KinoLelStartseite.bereit.collectAsState()
 	AnimatedVisibility(visible = !bereit, enter = androidx.compose.animation.EnterTransition.None, exit = fadeOut(tween(250))) {
 		Box(
-			modifier = Modifier
-				.fillMaxSize()
-				.semantics { contentDescription = "kinolel.startbild" },
+			modifier = Modifier.fillMaxSize(),
 			contentAlignment = Alignment.Center,
 		) {
 			AppThemeBackground()
