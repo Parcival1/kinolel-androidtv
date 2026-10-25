@@ -16,6 +16,7 @@ import androidx.work.WorkManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import androidx.activity.addCallback
 import org.jellyfin.androidtv.kinolel.Aktualisierung
@@ -101,11 +102,14 @@ class MainActivity : FragmentActivity() {
 
 		interactionTrackerViewModel.activityPaused = false
 
-		// KinoLel: einmalig „Was ist neu“ nach einem Update, dann bei jedem Öffnen nach einer neuen Version suchen
-		Neuigkeiten.zeigenFallsNeu(this)
-		lifecycleScope.launch { Aktualisierung.pruefen(this@MainActivity) }
-		// KinoLel: Sprache des Kontos (Deutsch/Magyar wie auf kinolel.de gewählt)
-		lifecycleScope.launch { Sprache.ausKonto(this@MainActivity, kinolelApi) }
+		// KinoLel: Sprache des Kontos (Deutsch/Magyar wie auf kinolel.de gewählt) zuerst, dann einmalig „Was ist neu“ nach
+		// einem Update und die Suche nach einer neuen Version – beides in dieser Sprache (Lel 25.10.). Stellt sie die
+		// App-Sprache um, baut Android die Activity neu auf; die Meldungen kommen dann beim nächsten onResume.
+		lifecycleScope.launch {
+			if (Sprache.ausKonto(this@MainActivity, kinolelApi) || !isActive) return@launch
+			Neuigkeiten.zeigenFallsNeu(this@MainActivity)
+			Aktualisierung.pruefen(this@MainActivity)
+		}
 	}
 
 	private fun validateAuthentication(): Boolean {

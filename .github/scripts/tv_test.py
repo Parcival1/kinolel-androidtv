@@ -236,6 +236,25 @@ def startseite_wie_lel():
         log(f"Startseiten-Abschnitte nicht gesetzt: {e}")
 
 
+def sprache_konto(wert):
+    """„kl-sprache“ des Testkontos setzen wie die Wahl Deutsch/Magyar auf kinolel.de (None: entfernen).
+    Ursprungszustand merken – am Ende stellt startseite_zurueck() alles wieder her."""
+    try:
+        d = api.ruf("GET", anzeige_pfad())
+        if ANZEIGE_ORIGINAL[0] is None:
+            ANZEIGE_ORIGINAL[0] = json.loads(json.dumps(d))
+        prefs = dict(d.get("CustomPrefs") or {})
+        if wert is None:
+            prefs.pop("kl-sprache", None)
+        else:
+            prefs["kl-sprache"] = wert
+        d["CustomPrefs"] = prefs
+        api.ruf("POST", anzeige_pfad(), d)
+        log(f"Sprache im Testkonto: {wert or 'keine'}")
+    except Exception as e:  # noqa: BLE001
+        log(f"Sprache im Testkonto nicht gesetzt: {e}")
+
+
 def startseite_zurueck():
     if ANZEIGE_ORIGINAL[0] is not None:
         try:
@@ -883,6 +902,25 @@ def main():
     # 16. Alle Einstellungsseiten öffnen (Lel 25.10.: „… in den Einstellungen steht irgendwo immer noch ‚Jellyfin‘“)
     seiten = einstellungen_rundgang()
     merke("Einstellungen: Seiten mit der Fernbedienung geöffnet", len(seiten) >= 8, f"{len(seiten)} Seiten")
+
+    # 17. Sprache wie in KinoLel gewählt (Lel 25.10.: „Sind Updatenachrichten auch auf Ungarisch … wenn die ausgewählte
+    #     Sprache auf Ungarisch ist?“): App auf Deutsch, im Konto „Magyar“ -> „Was ist neu“ auf Ungarisch.
+    #     Danach App wieder Deutsch, Konto-Eintrag entfernt (am Ende stellt finally den Ursprungszustand her).
+    sprache_konto("hu")
+    app_stopp()
+    einstellungen_schreiben({"neuigkeiten_gesehen": "0.0.9", "spaeter_bis": int(time.time() * 1000) + 3600_000})
+    app_start()
+    time.sleep(12)  # Sprache lesen, App-Sprache umstellen, Activity neu – währenddessen nicht lesen (Bedienungshilfe)
+    xml = warte_auf(enthaelt("Újdonságok", "Neu in KinoLel"), 60, takt=3)
+    bild("17-was-ist-neu-ungarisch")
+    titel = next((t for t in texte(xml or "") if "Újdonságok" in t or "Neu in KinoLel" in t), "nicht gezeigt")
+    gebiet = adb("shell", "cmd", "locale", "get-app-locales", PAKET).strip()
+    merke("„Was ist neu“ ungarisch (App auf Deutsch, im Konto Magyar)", "Újdonságok" in titel, f"{titel}; {gebiet[-40:]}")
+    if xml is not None:
+        taste("DPAD_CENTER", pause=2)
+    sprache_konto(None)
+    app_stopp()
+    adb("shell", "cmd", "locale", "set-app-locales", PAKET, "--locales", "de-DE")
 
 
 try:

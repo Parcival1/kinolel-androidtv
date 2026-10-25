@@ -31,7 +31,8 @@ object Neuigkeiten {
 		}.getOrDefault(false)
 		if (!aktualisiert) return
 
-		val eintraege = runCatching { lesen(context, Marke.sprache(context)) }
+		val texte = context.inKinoLelSprache
+		val eintraege = runCatching { lesen(context, Sprache.aktuell(context)) }
 			.onFailure { Timber.w(it, "KinoLel: Neuigkeiten") }
 			.getOrNull() ?: return
 		val passend = eintraege
@@ -43,7 +44,7 @@ object Neuigkeiten {
 			passend.forEachIndexed { i, (v, punkte) ->
 				if (passend.size > 1) {
 					if (i > 0) append("\n")
-					append(context.getString(R.string.kinolel_neu_version, v.joinToString("."))).append("\n")
+					append(texte.getString(R.string.kinolel_neu_version, v.joinToString("."))).append("\n")
 				}
 				punkte.forEach { append("• ").append(it).append("\n") }
 			}
@@ -51,10 +52,10 @@ object Neuigkeiten {
 
 		KinoLelMeldungen.zeigen(
 			KinoLelMeldung(
-				titel = context.getString(R.string.kinolel_neu_titel, aktuell.joinToString(".")),
+				titel = texte.getString(R.string.kinolel_neu_titel, aktuell.joinToString(".")),
 				text = text,
 				kennung = "kinolel.neuigkeiten",
-				knoepfe = listOf(KinoLelKnopf(context.getString(R.string.kinolel_neu_ok), haupt = true, kennung = "kinolel.neuigkeiten.ok")),
+				knoepfe = listOf(KinoLelKnopf(texte.getString(R.string.kinolel_neu_ok), haupt = true, kennung = "kinolel.neuigkeiten.ok")),
 			)
 		)
 	}

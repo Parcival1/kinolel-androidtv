@@ -66,8 +66,8 @@ object Aktualisierung {
 
 		when {
 			neu != null && neuer(neu.version, BuildConfig.VERSION_NAME) -> hinweis(context, neu)
-			vonHand && neu != null -> Toast.makeText(context, R.string.kinolel_update_aktuell, Toast.LENGTH_LONG).show()
-			vonHand -> Toast.makeText(context, R.string.kinolel_update_keine_verbindung, Toast.LENGTH_LONG).show()
+			vonHand && neu != null -> Toast.makeText(context, context.inKinoLelSprache.getText(R.string.kinolel_update_aktuell), Toast.LENGTH_LONG).show()
+			vonHand -> Toast.makeText(context, context.inKinoLelSprache.getText(R.string.kinolel_update_keine_verbindung), Toast.LENGTH_LONG).show()
 		}
 	}
 
@@ -114,14 +114,14 @@ object Aktualisierung {
 	private fun hinweis(context: Context, neu: NeueVersion) {
 		KinoLelMeldungen.zeigen(
 			KinoLelMeldung(
-				titel = context.getString(R.string.kinolel_update_titel),
-				text = context.getString(R.string.kinolel_update_text, neu.version, BuildConfig.VERSION_NAME),
+				titel = context.inKinoLelSprache.getString(R.string.kinolel_update_titel),
+				text = context.inKinoLelSprache.getString(R.string.kinolel_update_text, neu.version, BuildConfig.VERSION_NAME),
 				kennung = KENNUNG,
 				knoepfe = listOf(
-					KinoLelKnopf(context.getString(R.string.kinolel_spaeter), kennung = "kinolel.update.spaeter") {
+					KinoLelKnopf(context.inKinoLelSprache.getString(R.string.kinolel_spaeter), kennung = "kinolel.update.spaeter") {
 						einstellungen(context).edit().putLong("spaeter_bis", System.currentTimeMillis() + SPAETER_MS).apply()
 					},
-					KinoLelKnopf(context.getString(R.string.kinolel_update_jetzt), haupt = true, kennung = "kinolel.update.jetzt") {
+					KinoLelKnopf(context.inKinoLelSprache.getString(R.string.kinolel_update_jetzt), haupt = true, kennung = "kinolel.update.jetzt") {
 						installieren(context.applicationContext, neu)
 					},
 				),
@@ -137,12 +137,12 @@ object Aktualisierung {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !context.packageManager.canRequestPackageInstalls()) {
 			KinoLelMeldungen.zeigen(
 				KinoLelMeldung(
-					titel = context.getString(R.string.kinolel_update_freigabe_titel),
-					text = context.getString(R.string.kinolel_update_freigabe_text),
+					titel = context.inKinoLelSprache.getString(R.string.kinolel_update_freigabe_titel),
+					text = context.inKinoLelSprache.getString(R.string.kinolel_update_freigabe_text),
 					kennung = "kinolel.update.freigabe",
 					knoepfe = listOf(
-						KinoLelKnopf(context.getString(R.string.kinolel_abbrechen)),
-						KinoLelKnopf(context.getString(R.string.kinolel_einstellungen_oeffnen), haupt = true) {
+						KinoLelKnopf(context.inKinoLelSprache.getString(R.string.kinolel_abbrechen)),
+						KinoLelKnopf(context.inKinoLelSprache.getString(R.string.kinolel_einstellungen_oeffnen), haupt = true) {
 							einstellungenOeffnen(context)
 						},
 					),
@@ -151,7 +151,7 @@ object Aktualisierung {
 			return
 		}
 
-		Toast.makeText(context, context.getString(R.string.kinolel_update_laedt, neu.version), Toast.LENGTH_LONG).show()
+		Toast.makeText(context, context.inKinoLelSprache.getString(R.string.kinolel_update_laedt, neu.version), Toast.LENGTH_LONG).show()
 		ProcessLifecycleOwner.get().lifecycleScope.launch { installation(context, neu) }
 	}
 
@@ -179,7 +179,7 @@ object Aktualisierung {
 				.onFailure { Timber.e(it, "KinoLel: Update nicht geladen oder Installation nicht gestartet") }
 				.isSuccess
 		}
-		if (!ok) Toast.makeText(context, R.string.kinolel_update_fehler, Toast.LENGTH_LONG).show()
+		if (!ok) Toast.makeText(context, context.inKinoLelSprache.getText(R.string.kinolel_update_fehler), Toast.LENGTH_LONG).show()
 	}
 
 	private fun laden(context: Context, neu: NeueVersion): File {
@@ -242,7 +242,7 @@ class InstallationsAntwort : BroadcastReceiver() {
 			PackageInstaller.STATUS_SUCCESS -> Timber.i("KinoLel: Update installiert")
 			else -> {
 				Timber.w("KinoLel: Installation fehlgeschlagen ($status): ${intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)}")
-				Toast.makeText(context, R.string.kinolel_update_fehler, Toast.LENGTH_LONG).show()
+				Toast.makeText(context, context.inKinoLelSprache.getText(R.string.kinolel_update_fehler), Toast.LENGTH_LONG).show()
 			}
 		}
 	}

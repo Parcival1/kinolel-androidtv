@@ -45,6 +45,7 @@ import org.jellyfin.androidtv.kinolel.KinoLelKnopf
 import org.jellyfin.androidtv.kinolel.KinoLelMeldung
 import org.jellyfin.androidtv.kinolel.KinoLelMeldungen
 import org.jellyfin.androidtv.kinolel.Marke
+import org.jellyfin.androidtv.kinolel.inKinoLelSprache
 import timber.log.Timber
 import java.time.Instant
 import java.util.UUID
@@ -259,7 +260,7 @@ class SocketHandler(
 						text = inhalt,
 						kennung = "kinolel.nachricht",
 						zeitMs = (timeoutMs ?: 0L).coerceIn(8_000L, 30_000L),
-						knoepfe = listOf(KinoLelKnopf(context.getString(R.string.kinolel_neu_ok), haupt = true, kennung = "kinolel.nachricht.ok")),
+						knoepfe = listOf(KinoLelKnopf(context.inKinoLelSprache.getString(R.string.kinolel_neu_ok), haupt = true, kennung = "kinolel.nachricht.ok")),
 					)
 				)
 			} else {

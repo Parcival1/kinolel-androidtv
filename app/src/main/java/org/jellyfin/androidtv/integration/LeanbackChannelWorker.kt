@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import org.jellyfin.androidtv.R
+import org.jellyfin.androidtv.kinolel.inKinoLelSprache
 import org.jellyfin.androidtv.data.repository.ItemRepository
 import org.jellyfin.androidtv.data.repository.UserViewsRepository
 import org.jellyfin.androidtv.integration.provider.ImageProvider
@@ -124,21 +125,21 @@ class LeanbackChannelWorker(
 			val resumeChannel = getChannelUri(
 				"kinolel_resume", Channel.Builder()
 					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
-					.setDisplayName(context.getString(R.string.kinolel_kanal_weiter))
+					.setDisplayName(context.inKinoLelSprache.getString(R.string.kinolel_kanal_weiter))
 					.setAppLinkIntent(Intent(context, StartupActivity::class.java))
 					.build()
 			)
 			val nextUpChannel = getChannelUri(
 				"next_up", Channel.Builder()
 					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
-					.setDisplayName(context.getString(R.string.kinolel_kanal_naechstes))
+					.setDisplayName(context.inKinoLelSprache.getString(R.string.kinolel_kanal_naechstes))
 					.setAppLinkIntent(Intent(context, StartupActivity::class.java))
 					.build()
 			)
 			val latestMediaChannel = getChannelUri(
 				"latest_media", Channel.Builder()
 					.setType(TvContractCompat.Channels.TYPE_PREVIEW)
-					.setDisplayName(context.getString(R.string.kinolel_kanal_neu))
+					.setDisplayName(context.inKinoLelSprache.getString(R.string.kinolel_kanal_neu))
 					.setAppLinkIntent(Intent(context, StartupActivity::class.java))
 					.build(),
 				default = true

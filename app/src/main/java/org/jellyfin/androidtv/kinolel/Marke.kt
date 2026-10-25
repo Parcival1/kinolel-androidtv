@@ -1,7 +1,6 @@
 package org.jellyfin.androidtv.kinolel
 
 import android.content.Context
-import androidx.core.os.ConfigurationCompat
 import org.jellyfin.androidtv.BuildConfig
 
 /**
@@ -27,12 +26,8 @@ object Marke {
 	 */
 	fun quickConnectAdresse(code: String) = "$SERVER/web/kinolel/qc.html?code=$code"
 
-	/** Sprache der Oberfläche: folgt der Sprache des Fernsehers (Jellyfin speichert keine Sprache je Benutzer). */
-	fun sprache(context: Context): String = when (ConfigurationCompat.getLocales(context.resources.configuration)[0]?.language) {
-		"hu" -> "hu"
-		"de" -> "de"
-		else -> "en"
-	}
+	/** Sprache der KinoLel-Texte: die im Konto gewählte (kinolel.de), sonst die der Oberfläche – siehe [Sprache]. */
+	fun sprache(context: Context): String = Sprache.aktuell(context)
 
 	fun ungarisch(context: Context) = sprache(context) == "hu"
 

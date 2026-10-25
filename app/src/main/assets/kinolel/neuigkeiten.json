@@ -3,13 +3,19 @@
   {
    "version": "1.0",
    "de": [
-    "Deine Medienbibliotheken sind wieder als Kanal auf der Google-TV-Startseite. Außerdem Fehlerbehebungen und Verbesserungen."
+    "Deine Medienbibliotheken sind wieder als Kanal auf der Google-TV-Startseite.",
+    "Meldungen der App (zum Beispiel diese hier und Hinweise zu Updates) erscheinen jetzt in der Sprache, die du in KinoLel gewählt hast.",
+    "Außerdem Fehlerbehebungen und Verbesserungen."
    ],
    "hu": [
-    "A médiatáraid ismét csatornaként jelennek meg a Google TV kezdőképernyőjén. Emellett hibajavítások és fejlesztések."
+    "A médiatáraid ismét csatornaként jelennek meg a Google TV kezdőképernyőjén.",
+    "Az alkalmazás üzenetei (például ez, és a frissítésekről szóló értesítések) most a KinoLelben kiválasztott nyelven jelennek meg.",
+    "Emellett hibajavítások és fejlesztések."
    ],
    "en": [
-    "Your media libraries are back as a channel on the Google TV home screen. Also bug fixes and improvements."
+    "Your media libraries are back as a channel on the Google TV home screen.",
+    "App messages (like this one and update notices) now appear in the language you chose in KinoLel.",
+    "Also bug fixes and improvements."
    ]
   },
   {
