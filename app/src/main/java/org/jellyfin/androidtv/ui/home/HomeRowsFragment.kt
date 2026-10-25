@@ -91,7 +91,7 @@ class HomeRowsFragment : RowsSupportFragment(), AudioEventListener, View.OnKeyLi
 	private var kinolelReihenAngelegt = false
 
 	private suspend fun kinolelLiveTvSender(): Boolean = runCatching {
-		api.liveTvApi.getLiveTvChannels(limit = 1, enableTotalRecordCount = true).content.totalRecordCount > 0
+		api.liveTvApi.getLiveTvChannels(limit = 1).content.items.isNotEmpty()
 	}.onFailure { Timber.w(it, "KinoLel: Live-TV-Sender nicht abfragbar") }.getOrDefault(false)
 
 	// Special rows
