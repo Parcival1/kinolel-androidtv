@@ -297,8 +297,13 @@ VERBOTEN = re.compile(r"(?i)abmeld|sign ?out|kijelentkez|entfern|remove|eltávol
 LIZENZ = re.compile(r"(?i)lizenz|licen")
 
 
+# Die Einstellungen sind ein Fenster am rechten Rand (350 dp = 700 px bei 1920 px Breite): Fokus links davon heißt,
+# der Rundgang ist aus den Einstellungen herausgefallen -> nichts mehr drücken
+PANEL_LINKS = 1100
+
+
 def fokus_eintrag(xml):
-    """(Beschriftung, umschaltbar) des fokussierten Eintrags, Beschriftung aus allen Texten darunter"""
+    """(Beschriftung, umschaltbar, linker Rand) des fokussierten Eintrags, Beschriftung aus allen Texten darunter"""
     try:
         wurzel = ET.fromstring(xml)
     except ET.ParseError:
@@ -306,7 +311,12 @@ def fokus_eintrag(xml):
     for n in wurzel.iter("node"):
         if n.get("focused") == "true":
             teile = [k.get("text") or k.get("content-desc") for k in n.iter("node") if (k.get("text") or k.get("content-desc"))]
-            return " / ".join(teile)[:90], any(k.get("checkable") == "true" for k in n.iter("node"))
+            links = int((re.match(r"\[(\d+),", n.get("bounds", "")) or [0, 0])[1])
+            # Umschalter/Auswahl (Checkbox, Schalter, Radio) nie drücken – das würde Einstellungen ändern
+            umschaltbar = any(k.get("checkable") == "true" or k.get("selected") == "true"
+                              or any(c in (k.get("class") or "") for c in ("RadioButton", "CheckBox", "Switch"))
+                              for k in n.iter("node"))
+            return " / ".join(teile)[:90], umschaltbar, links
     return None
 
 
@@ -327,6 +337,10 @@ def einstellungen_rundgang():
         taste("DPAD_RIGHT")
     taste("DPAD_CENTER", pause=2)
     seiten = []
+    raus = [False]
+
+    def im_panel(e):
+        return e is not None and e[2] >= PANEL_LINKS
 
     def seite(tiefe, pfad):
         SEITE[0] = " > ".join(pfad) or "Einstellungen"
@@ -334,9 +348,13 @@ def einstellungen_rundgang():
         seiten.append(SEITE[0])
         gesehen = []
         eintrag = fokus_eintrag(xml)
-        while eintrag and eintrag[0] not in gesehen and len(gesehen) < 30:
+        while eintrag and eintrag[0] not in gesehen and len(gesehen) < 30 and not raus[0]:
+            if not im_panel(eintrag):
+                raus[0] = True
+                log(f"Einstellungs-Rundgang: Fokus außerhalb der Einstellungen ({eintrag[0]}) – Rundgang beendet")
+                break
             gesehen.append(eintrag[0])
-            name, umschaltbar = eintrag
+            name, umschaltbar, _ = eintrag
             if tiefe < 3 and not umschaltbar and not VERBOTEN.search(name):
                 lizenz = bool(LIZENZ.search(name))
                 vorher = signatur(xml)
@@ -352,7 +370,7 @@ def einstellungen_rundgang():
                     # Fokus zurück auf denselben Eintrag
                     for _ in range(30):
                         e = fokus_eintrag(ui())
-                        if not e or e[0] == name:
+                        if not e or e[0] == name or not im_panel(e):
                             break
                         taste("DPAD_DOWN", pause=0.4)
                 JELLYFIN_ERLAUBT[0] = False
@@ -362,7 +380,10 @@ def einstellungen_rundgang():
             eintrag = fokus_eintrag(xml)
 
     try:
-        seite(0, [])
+        if im_panel(fokus_eintrag(ui())):
+            seite(0, [])
+        else:
+            log("Einstellungen nicht geöffnet (Fokus nicht im Einstellungsfenster)")
     finally:
         JELLYFIN_ERLAUBT[0] = False
         for _ in range(6):  # Einstellungen schließen
@@ -371,7 +392,7 @@ def einstellungen_rundgang():
             taste("BACK", pause=1)
     with open(os.path.join(AUS, "16-einstellungen-seiten.txt"), "w", encoding="utf-8") as f:
         f.write("\n".join(seiten) + "\n")
-    return seiten
+    return [] if raus[0] else seiten
 
 
 # --- Test-Server für die Update-Prüfung (der Emulator erreicht den Runner unter 10.0.2.2) ------------------------
