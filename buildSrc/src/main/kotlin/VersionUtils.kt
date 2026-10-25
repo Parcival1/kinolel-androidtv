@@ -43,11 +43,12 @@ fun getVersionCode(versionName: String): Int {
 		}
 
 	// Parse core part
-	val (major, minor, patch) = versionCore
+	// KinoLel (Lel 25.10.: Versionen ab „1.0“, danach 1.1, 1.2 …): fehlende Stellen zählen als 0
+	val (major, minor, patch) = (versionCore
 		.splitToSequence('.')
 		.mapNotNull(String::toIntOrNull)
 		.take(3)
-		.toList()
+		.toList() + listOf(0, 0, 0))
 
 	// Parse pre release part (ignore type, only get the number)
 	val buildVersion = versionPreRelease

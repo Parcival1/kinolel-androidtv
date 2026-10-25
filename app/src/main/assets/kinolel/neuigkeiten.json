@@ -1,30 +1,27 @@
 {
  "versionen": [
   {
-   "version": "0.1.4",
+   "version": "1.0",
    "de": [
-    "Der Kanal „Meine Medien“ mit deinen Bibliotheken ist zurück. Falls er am Startbildschirm fehlt: Einstellungen → Kanäle → KinoLel → „Meine Medien“ einschalten."
+    "Deine Medienbibliotheken sind wieder als Kanal auf der Google-TV-Startseite. Außerdem Fehlerbehebungen und Verbesserungen."
    ],
    "hu": [
-    "Visszatért a „Saját média” csatorna a médiatáraiddal. Ha nem látszik a kezdőképernyőn: Beállítások → Csatornák → KinoLel → kapcsold be a „Saját média” csatornát."
+    "A médiatáraid ismét csatornaként jelennek meg a Google TV kezdőképernyőjén. Emellett hibajavítások és fejlesztések."
    ],
    "en": [
-    "The “My media” channel with your libraries is back. If it is missing on the home screen: Settings → Channels → KinoLel → turn on “My media”."
+    "Your media libraries are back as a channel on the Google TV home screen. Also bug fixes and improvements."
    ]
   },
   {
    "version": "0.1.3",
    "de": [
-    "Beim Öffnen bleibt das KinoLel-Startbild, bis die Startseite fertig ist – keine halb aufgebauten Menüs mehr.",
-    "Der leere Bereich „Live-TV“ erscheint nicht mehr, wenn es keine Sender gibt."
+    "Beim Öffnen erscheint die Startseite jetzt ohne kurzes Flackern. Außerdem Fehlerbehebungen und Verbesserungen."
    ],
    "hu": [
-    "Megnyitáskor a KinoLel indítóképe addig látszik, amíg a kezdőlap el nem készül – nincsenek többé félkész menük.",
-    "Az üres „Élő TV” rész már nem jelenik meg, ha nincsenek csatornák."
+    "Megnyitáskor a kezdőlap most villogás nélkül jelenik meg. Emellett hibajavítások és fejlesztések."
    ],
    "en": [
-    "When opening, the KinoLel start screen stays until the home screen is ready – no more half-built menus.",
-    "The empty “Live TV” section no longer appears when there are no channels."
+    "When opening, the home screen now appears without flickering. Also bug fixes and improvements."
    ]
   },
   {
