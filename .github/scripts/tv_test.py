@@ -670,10 +670,12 @@ def main():
             bild("07e-tonspur-ziel")
             taste("DPAD_CENTER", pause=4)
             gewechselt = True
+    # Beim Wechsel startet der Server die Umwandlung neu – kurz meldet die Sitzung dann gar keine Tonspur (None).
+    # Darum warten, bis eine Spur gemeldet wird, die nicht die alte ist (bis 30 s).
     nachher = vorher
-    for _ in range(8):
+    for _ in range(15):
         nachher = ((api.tv_sitzung() or {}).get("PlayState") or {}).get("AudioStreamIndex")
-        if nachher != vorher:
+        if nachher is not None and nachher != vorher:
             break
         time.sleep(2)
     merke("Tonspur wechseln (andere Sprache)", gewechselt and nachher is not None and nachher != vorher, f"{vorher} -> {nachher}")
