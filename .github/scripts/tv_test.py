@@ -767,14 +767,25 @@ def main():
         merke("Fernsteuerung: " + name, ok, f"{(zustand().get('PositionTicks') or 0) / 1e7:.0f} s" if name == "Spulen" else "")
 
     # 9. Nächste Folge: Folge kurz vor dem Ende starten -> Countdown „Als Nächstes“ -> nächste Folge läuft von selbst
-    nu = (api.ruf("GET", f"/Shows/NextUp?userId={api.user}&limit=5") or {}).get("Items", [])
+    # Kandidaten: „Als Nächstes“ des Testkontos; die Folge braucht eine Nachfolgerin – auch in der nächsten Staffel.
+    # Das Testkonto ändert sich mit jedem Lauf (hier und im Android-Download-Test wird geschaut) -> notfalls eine
+    # beliebige Serie mit mindestens zwei Folgen (Folge kurz vor dem Ende starten: wenig Last).
+    nu = (api.ruf("GET", f"/Shows/NextUp?userId={api.user}&limit=10") or {}).get("Items", [])
+    if not nu:
+        nu = (api.ruf("GET", f"/Users/{api.user}/Items?IncludeItemTypes=Episode&Recursive=true&SortBy=Random&Limit=10"
+                      f"&Fields=SeriesId,SeasonId") or {}).get("Items", [])
+        log(f"„Als Nächstes“ leer – {len(nu)} zufällige Folgen als Kandidaten")
     folge = None
     for kandidat in nu:
-        folgen = (api.ruf("GET", f"/Shows/{kandidat['SeriesId']}/Episodes?userId={api.user}&seasonId={kandidat.get('SeasonId', '')}") or {}).get("Items", [])
+        if not kandidat.get("SeriesId"):
+            continue
+        folgen = (api.ruf("GET", f"/Shows/{kandidat['SeriesId']}/Episodes?userId={api.user}") or {}).get("Items", [])
         ids = [f["Id"] for f in folgen]
         if kandidat["Id"] in ids and ids.index(kandidat["Id"]) < len(ids) - 1:
             folge, naechste = kandidat, folgen[ids.index(kandidat["Id"]) + 1]
             break
+    log("Nächste Folge: " + (f"{folge.get('SeriesName')}: {folge.get('Name')} -> {naechste.get('Name')}" if folge
+                             else f"keine Nachfolgerin unter {len(nu)} Kandidaten"))
     if folge:
         laenge = (api.ruf("GET", f"/Items/{folge['Id']}?userId={api.user}") or {}).get("RunTimeTicks") or 0
         try:
